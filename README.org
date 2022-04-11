@@ -89,17 +89,12 @@ These are the config files for each indiviual locally managed systems, remote sy
                       (supplementary-groups
                        '("wheel" "netdev" "audio" "video")))
                     (user-account
-                     (name "nixbld1")
+                     (name "nixbld0")
                      (group "nixbld")
-                     (supplementary-groups
-                      '("nixbld"))
                      (create-home-directory? #f)
                      (shell "$(which nologin)")
                      (system? #t))
                     %base-user-accounts))
-      (groups (cons* (user-group
-                      (name "nixbld"))
-                     %base-groups))
 
       (packages
         (append
