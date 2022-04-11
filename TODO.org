@@ -1,0 +1,100 @@
+#+title: Project todos
+This file acts as a basic wishlist for my configs/dotfiles
+
+* Goals
+My goal for this configuration is to be able to setup defaults for certain computing needs, such as containers, desktop, graphic, build farm, etc...
+And be able to set hosts up based switching on and off these basic configurations, and/or detecting basic system (hardware) configurations/limitations. 
+* Meta
+** TODO Populate this file from TODOs within seperate config file with links
+
+* TODO Guix
+
+** TODO MPD
+Add MPD to services, possibly using guix-home, but home service is not built yet.
+
+** TODO KDE Connect
+Phone integration for the event of another screen malfunction
+
+** TODO Seperate modules
+Seperate modules/configs into:
+- Base
+- Graphic
+- Headless/server
+- Home
+- Individual Hosts
+
+* TODO Stumpwm
+
+** TODO Workspace-like Groups
+Make Groups tied to numbers or characters, able to switch with ~s-~
+
+** MPD controls
+
+** TODO Integrate apps
+Make buffers and frames act as wm objects
+Call program commands from StumpWM
+*** Nyxt
+
+*** Emacs
+
+* TODO Emacs
+* TODO Nyxt 
+* Services to add
+
+** Unattented-upgrades
+
+** Upower
+
+** Getmail
+
+** Transmission
+
+** Yggdrasil
+
+** Wireguard
+
+** TLP
+
+** MPD
+
+** Ganeti
+
+** git-daemon
+
+** Auditd
+
+* Servers
+
+** Postgres
+
+** Memcached
+
+** dovecot
+
+** exim
+
+** Prosody
+
+** BitlBee
+
+** Quassel
+
+** Murmur
+
+** Tailon
+
+** Zabbix
+
+** HPC-guix
+
+** gmnisrv
+
+** Cert-bot
+
+** Knot-DNS
+
+** Cuirass
+
+** Cgit
+
+** Auditd
