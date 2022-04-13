@@ -39,9 +39,10 @@ I used "lattice" as my module name as a play on a structure to control my GNU/Gu
 #+END_SRC
 * Systems
 These are the config files for each indiviual locally managed systems, remote systems (VPSs) are managed through ~guix deploy~ and docmented under ~Deployments~
+** Base
+This is a base system with variables defined that are shared with all systems.
+** HalX220
 #+begin_src scheme :tangle ./halx220.scm
-  ;; NOTE: This file is generated from ~/dotfiles/Systems.org. See commentary there.
-
     (define-module ( systems halx220)
       #:use-module (gnu)
       #:use-module (srfi srfi-1)
@@ -55,7 +56,6 @@ These are the config files for each indiviual locally managed systems, remote sy
       #:use-module (gnu services virtualization)
       #:use-module (gnu services syncthing)
       #:use-module (gnu packages wm)
-      #:use-module (gnu packages vim)
       #:use-module (gnu packages gtk)
       #:use-module (gnu packages xorg)
       #:use-module (gnu packages emacs)
@@ -68,9 +68,7 @@ These are the config files for each indiviual locally managed systems, remote sy
       #:use-module (gnu packages version-control)
       #:use-module (gnu packages package-management))
 
-  (use-modules (gnu)
-               (gnu packages finance)
-               )
+  (use-modules (gnu))
     (use-service-modules nix)
     (use-service-modules desktop xorg)
     (use-package-modules shells)
@@ -144,125 +142,222 @@ These are the config files for each indiviual locally managed systems, remote sy
 
 * User
 This is my personal guix home configuration that configures guix home for my user account.
-#+begin_src scheme
-;; This "home-environment" file can be passed to 'guix home reconfigure'
-;; to reproduce the content of your profile.  This is "symbolic": it only
-;; specifies package names.  To reproduce the exact same profile, you also
-;; need to capture the channels being used, as returned by "guix describe".
-;; See the "Replicating Guix" section in the manual.
+#+begin_src scheme :tangle ./home.scm
+  ;; This "home-environment" file can be passed to 'guix home reconfigure'
+  ;; to reproduce the content of your profile.  This is "symbolic": it only
+  ;; specifies package names.  To reproduce the exact same profile, you also
+  ;; need to capture the channels being used, as returned by "guix describe".
+  ;; See the "Replicating Guix" section in the manual.
 
-(use-modules
-  (gnu home)
-  (gnu packages)
-  (gnu services)
-  (guix gexp)
-  (gnu home services shells)
-  (gnu home services desktop))
+  (use-modules
+    (gnu home)
+    (gnu packages)
+    (gnu services)
+    (guix gexp)
+    (gnu home services shells)
+    (gnu home services desktop)
+    (rde features))
 
-(home-environment
-  (packages
-    (map specification->package
-         (list "emacs-evil-collection"
-               "emacs-org-bullets"
-               "nomad"
-               "nyxt"
-               "qutebrowser"
-               "emacs-org-roam"
-               "git"
-               "emacs"
-               "emacs-exwm"
-               "emacs-ytdl"
-               "youtube-dl"
-               "emacs-emms"
-               "stow"
-               "emacs-yasnippet"
-               "emacs-counsel"
-               "emacs-smartparens"
-               "emacs-rainbow-delimiters"
-               "emacs-minions"
-               "emacs-vertico"
-               "emacs-doom-modeline"
-               "emacs-projectile"
-               "emacs-all-the-icons"
-               "emacs-orderless"
-               "font-fira-code"
-               "neovim"
-               "font-liberation"
-               "font-libertinus"
-               "font-linuxlibertine"
-               "emacs-use-package"
-               "emacs-no-littering"
-               "emacs-desktop-environment"
-               "emacs-dashboard"
-               "emacs-evil"
-               "emacs-undo-tree"
-               "emacs-which-key"
-               "emacs-general"
-               "emacs-doom-themes"
-               "emacs-helpful"
-               "emacs-hydra"
-               "emacs-corfu"
-               "emacs-consult"
-               "emacs-marginalia"
-               "emacs-embark"
-               "emacs-hl-todo"
-               "emacs-deft"
-               "emacs-org-appear"
-               "emacs-magit"
-               "emacs-lsp-mode"
-               "emacs-lsp-ui"
-               "emacs-geiser"
-               "sbcl"
-               "emacs-sly"
-               "emacs-slime"
-               "emacs-cider"
-               "emacs-js2-mode"
-               "emacs-web-mode"
-               "emacs-calfw"
-               "emacs-eshell-z"
-               "emacs-esh-autosuggest"
-               "emacs-xterm-color"
-               "emacs-exec-path-from-shell"
-               "emacs-fish-completion"
-               "emacs-eshell-syntax-highlighting"
-               "emacs-eshell-toggle"
-               "emacs-vterm"
-               "emacs-tracking"
-               "emacs-erc-image"
-               "emacs-erc-hl-nicks"
-               "emacs-elfeed"
-               "emacs-nov-el"
-               "emacs-elpher"
-               "emacs-guix"
-               "emacs-daemons"
-               "emacs-pulseaudio-control"
-               "emacs-docker"
-               "emacs-docker-tramp"
-               "emacs-dockerfile-mode")))
-  (services
-    (list (service
-            home-bash-service-type
-            (home-bash-configuration
-              (aliases
-                '(("grep='grep --color" . "auto")
-                  ("ll" . "ls -l")
-                  ("ls='ls -p --color" . "auto")))
-              (bashrc
-                (list (local-file
-                        "/home/jak/.bashrc"
-                        "bashrc")))
-              (bash-profile
-                (list (local-file
-                        "/home/jak/.bash_profile"
-                        "bash_profile")))))
-	  (service home-redshift-service-type
-		   (home-redshift-configuration
-		    (location-provider 'manual)
-		    (latitude 33.3528)
-		    (longitude -111.8016)
-		    (daytime-temperature 6500)
-		    (nighttime-temperature 3000)
-		    (daytime-brightness 1.0)
-		    (nighttime-brightness 0.3))))))
+  (home-environment
+    (packages
+      (map specification->package
+           (list "emacs-evil-collection"
+                 "emacs-org-bullets"
+                 "nyxt"
+                 "emacs-org-roam"
+                 "git"
+                 "emacs"
+                 "emacs-exwm"
+                 "emacs-ytdl"
+                 "youtube-dl"
+                 "emacs-emms"
+                 "stow"
+                 "emacs-yasnippet"
+                 "emacs-counsel"
+                 "emacs-smartparens"
+                 "emacs-rainbow-delimiters"
+                 "emacs-minions"
+                 "emacs-vertico"
+                 "emacs-doom-modeline"
+                 "emacs-projectile"
+                 "emacs-all-the-icons"
+                 "emacs-orderless"
+                 "font-fira-code"
+                 "neovim"
+                 "font-liberation"
+                 "font-libertinus"
+                 "font-linuxlibertine"
+                 "emacs-use-package"
+                 "emacs-no-littering"
+                 "emacs-desktop-environment"
+                 "emacs-dashboard"
+                 "emacs-evil"
+                 "emacs-undo-tree"
+                 "emacs-which-key"
+                 "emacs-general"
+                 "emacs-doom-themes"
+                 "emacs-helpful"
+                 "emacs-hydra"
+                 "emacs-corfu"
+                 "emacs-consult"
+                 "emacs-marginalia"
+                 "emacs-embark"
+                 "emacs-hl-todo"
+                 "emacs-deft"
+                 "emacs-org-appear"
+                 "emacs-magit"
+                 "emacs-lsp-mode"
+                 "emacs-lsp-ui"
+                 "emacs-geiser"
+                 "sbcl"
+                 "emacs-sly"
+                 "emacs-slime"
+                 "emacs-cider"
+                 "emacs-js2-mode"
+                 "emacs-web-mode"
+                 "emacs-calfw"
+                 "emacs-eshell-z"
+                 "emacs-esh-autosuggest"
+                 "emacs-xterm-color"
+                 "emacs-exec-path-from-shell"
+                 "emacs-fish-completion"
+                 "emacs-eshell-syntax-highlighting"
+                 "emacs-eshell-toggle"
+                 "emacs-vterm"
+                 "emacs-tracking"
+                 "emacs-erc-image"
+                 "emacs-erc-hl-nicks"
+                 "emacs-elfeed"
+                 "emacs-nov-el"
+                 "emacs-elpher"
+                 "emacs-guix"
+                 "emacs-daemons"
+                 "emacs-pulseaudio-control"
+                 "emacs-docker"
+                 "emacs-docker-tramp"
+                 "emacs-dockerfile-mode")))
+    (services
+      (list (service
+              home-bash-service-type
+              (home-bash-configuration
+                (aliases
+                  '(("grep='grep --color" . "auto")
+                    ("ll" . "ls -l")
+                    ("ls='ls -p --color" . "auto")))
+                (bashrc
+                  (list (local-file
+                          "/home/jak/.bashrc"
+                          "bashrc")))
+                (bash-profile
+                  (list (local-file
+                          "/home/jak/.bash_profile"
+                          "bash_profile")))))
+            (service home-redshift-service-type
+                     (home-redshift-configuration
+                      (location-provider 'manual)
+                      (latitude 33.3528)
+                      (longitude -111.8016)
+                      (daytime-temperature 6500)
+                      (nighttime-temperature 3000)
+                      (daytime-brightness 1.0)
+                      (nighttime-brightness 0.3))))))
+
+#+end_src
+
+* Emacs
+#+begin_src scheme ./lattice/features/emacs.scm
+  (define-module (lattice features emacs)
+    #:use-module (gnu packages)
+    #:use-module (gnu packages emacs)
+    #:use-module (gnu packages emacs-xyz)
+    #:use-module (gnu services)
+    #:use-module (gnu home-services emacs)
+    #:use-module (gnu home-services files)
+    #:use-module (guix packages)
+    #:use-module (guix gexp)
+    #:use-module (guix inferior)
+    #:use-module (guix channels)
+    #:use-module (guix transformations)
+    #:use-module (guix download)
+    #:use-module (guix git-download)
+    #:use-module (guix build-system)
+    #:use-module (guix build-system emacs)
+    #:use-module (guix build utils)
+    #:use-module (guix build-system copy)
+    #:use-module (guix build copy-build-system)
+    #:use-module ((guix licenses) #:prefix license:)
+    #:use-module (flat packages emacs)
+    #:use-module (srfi srfi-11))
+
+  (define emacs-packages
+    (list "emacs-evil-collection"
+          "emacs-org-bullets"
+          "emacs-ytdl"
+          "emacs-emms"
+          "emacs-yasnippet"
+          "emacs-counsel"
+          "emacs-smartparens"
+          "emacs-rainbow-delimiters"
+          "emacs-minions"
+          "emacs-vertico"
+          "emacs-doom-modeline"
+          "emacs-projectile"
+          "emacs-all-the-icons"
+          "emacs-orderless"
+          "emacs-use-package"
+          "emacs-no-littering"
+          "emacs-desktop-environment"
+          "emacs-dashboard"
+          "emacs-evil"
+          "emacs-undo-tree"
+          "emacs-which-key"
+          "emacs-general"
+          "emacs-doom-themes"
+          "emacs-helpful"
+          "emacs-hydra"
+          "emacs-corfu"
+          "emacs-consult"
+          "emacs-marginalia"
+          "emacs-embark"
+          "emacs-hl-todo"
+          "emacs-deft"
+          "emacs-org-appear"
+          "emacs-magit"
+          "emacs-lsp-mode"
+          "emacs-lsp-ui"
+          "emacs-geiser"
+          "emacs-sly"
+          "emacs-slime"
+          "emacs-cider"
+          "emacs-js2-mode"
+          "emacs-web-mode"
+          "emacs-calfw"
+          "emacs-eshell-z"
+          "emacs-esh-autosuggest"
+          "emacs-xterm-color"
+          "emacs-exec-path-from-shell"
+          "emacs-fish-completion"
+          "emacs-eshell-syntax-highlighting"
+          "emacs-eshell-toggle"
+          "emacs-vterm"
+          "emacs-tracking"
+          "emacs-erc-image"
+          "emacs-erc-hl-nicks"
+          "emacs-elfeed"
+          "emacs-nov-el"
+          "emacs-elpher"
+          "emacs-guix"
+          "emacs-daemons"
+          "emacs-pulseaudio-control"
+          "emacs-docker"
+          "emacs-docker-tramp"
+          "emacs-dockerfile-mode"))
+
+  (define-public emacs-service
+    (list (service home-emacs-service-type
+                   (home-emacs-configuration
+                    (package emacs-pgtk-native-comp)
+                    (server-mode #t)
+                    (elisp-packages emacs-packages)))))
 
 #+end_src
