@@ -360,8 +360,7 @@ This is my personal guix home configuration that configures guix home for my use
 * RDE Refactor
 This is a tempory section the I'm using to refactor my configurations to use [[https://git.sr.ht/~abcdw/rde][Tropin's rde system]]
 #+begin_src scheme :tangle ./config.scm 
-
-  (define-module (hal configs)
+  (define-module (configs)
     #:use-module (rde features)
     #:use-module (rde features base)
     #:use-module (rde features gnupg)
@@ -416,10 +415,10 @@ This is a tempory section the I'm using to refactor my configurations to use [[h
     "Packages from guix channel."
     (define channel-guix
       (list (channel
-             (name 'guix)
-             (url "https://git.savannah.gnu.org/git/guix.git")
-             (commit
-              "2b6af630d61dd5b16424be55088de2b079e9fbaf"))))
+	     (name 'guix)
+	     (url "https://git.savannah.gnu.org/git/guix.git")
+	     (commit
+	      "2b6af630d61dd5b16424be55088de2b079e9fbaf"))))
     (define inferior (inferior-for-channels channel-guix))
     (define (get-inferior-pkg pkg-name)
       (car (lookup-inferior-pkg pkg-name)))
@@ -444,14 +443,14 @@ This is a tempory section the I'm using to refactor my configurations to use [[h
       #:xwayland? #f
       #:extra-config
       `((output DP-2 scale 2)
-        (workspace 9 output DP-2)
-        (workspace 10 output DP-2)
+	(workspace 9 output DP-2)
+	(workspace 10 output DP-2)
 
-        (bindsym
-         --locked $mod+Shift+p exec
-         ,(file-append (@ (gnu packages music) playerctl) "/bin/playerctl")
-         play-pause)
-        (bindsym $mod+Shift+Return exec emacs)))
+	(bindsym
+	 --locked $mod+Shift+p exec
+	 ,(file-append (@ (gnu packages music) playerctl) "/bin/playerctl")
+	 play-pause)
+	(bindsym $mod+Shift+Return exec emacs)))
      (feature-sway-run-on-tty
       #:sway-tty-number 2)
      (feature-sway-screenshot)
@@ -477,10 +476,12 @@ This is a tempory section the I'm using to refactor my configurations to use [[h
       (append
        (list emacs-consult-dir)
        (pkgs "emacs-elfeed" "emacs-hl-todo"
-             "emacs-ytdl"
-             "emacs-ement"
-             "emacs-restart-emacs"
-             "emacs-org-present")))
+	     "emacs-ytdl"
+	     "emacs-ement"
+	     "emacs-restart-emacs"
+	     "emacs-org-present"
+	     "emacs-evil-collection"
+	     "emacs-all-the-icons")))
      (feature-emacs-appearance)
      (feature-emacs-faces)
      (feature-emacs-completion
@@ -524,40 +525,40 @@ This is a tempory section the I'm using to refactor my configurations to use [[h
       #:home-packages
       (append
        (pkgs
-        "nyxt"
-        "ungoogled-chromium-wayland" "ublock-origin-chromium"
+	"nyxt"
+	"ungoogled-chromium-wayland" "ublock-origin-chromium"
 
-        "jami"
+	"jami"
 
-        "alsa-utils" "youtube-dl" "imv"
-        "pavucontrol" "wev"
-        "hicolor-icon-theme" "adwaita-icon-theme" "gnome-themes-standard"
-        "papirus-icon-theme" "arc-theme"
-        "ffmpeg"
-        "ripgrep" "curl")))))
+	"alsa-utils" "youtube-dl" "imv"
+	"pavucontrol" "wev"
+	"hicolor-icon-theme" "adwaita-icon-theme" "gnome-themes-standard"
+	"papirus-icon-theme" "arc-theme"
+	"ffmpeg"
+	"ripgrep" "curl")))))
 
   ;;; Hardware/host specific features
 
   (define hal-file-systems
-    (cons* (file-system
-            (mount-point "/boot/efi")
-            (device (uuid "0351-5D8F" 'fat32))
-            (type "vfat"))
-           (file-system
-            (mount-point "/")
-            (device
-             (uuid "01ccdad1-366b-4d8d-92e8-30315e87e8b9"))
-            (type "ext4"))))
+    (list (file-system
+	    (mount-point "/boot/efi")
+	    (device (uuid "0351-5D8F" 'fat32))
+	    (type "vfat"))
+	   (file-system
+	    (mount-point "/")
+	    (device
+	     (uuid "01ccdad1-366b-4d8d-92e8-30315e87e8b9"))
+	    (type "ext4"))))
 
   (define %hal-features
     (list
      (feature-host-info
       #:host-name "hal"
-      #:timezone "Americas/Denver")))
+      #:timezone "America/Phoenix")
      ;;Setup bootloader
      ;;(feature-bootloader)
-     ;;(feature-file-systems
-      ;;#:file-systems hal-file-systems)))
+     (feature-file-systems
+      #:file-systems hal-file-systems)))
 
   ;;; rde-config and helpers for generating home-environment and
   ;;; operating-system records.
@@ -579,8 +580,8 @@ This is a tempory section the I'm using to refactor my configurations to use [[h
   (define (dispatcher)
     (let ((rde-target (getenv "RDE_TARGET")))
       (match rde-target
-        ("hal-home" (rde-config-home-environment hal-config))
-        ("hal-system" (rde-config-operating-system hal-config)))))
+	("hal-home" (rde-config-home-environment hal-config))
+	("hal-system" (rde-config-operating-system hal-config)))))
 
   (dispatcher)
 #+end_src
