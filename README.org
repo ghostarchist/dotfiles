@@ -40,7 +40,7 @@ I used "lattice" as my module name as a play on a structure to control my GNU/Gu
 * Systems
 These are the config files for each indiviual locally managed systems, remote systems (VPSs) are managed through ~guix deploy~ and docmented under ~Deployments~
 ** HalX220
-#+begin_src scheme :tangle ./hal
+#+begin_src scheme :tangle ./hal.scm
     (define-module ( systems hal)
       #:use-module (gnu)
       #:use-module (srfi srfi-1)
