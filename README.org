@@ -359,7 +359,9 @@ This is my personal guix home configuration that configures guix home for my use
 #+e
 * RDE Refactor
 This is a tempory section the I'm using to refactor my configurations to use [[https://git.sr.ht/~abcdw/rde][Tropin's rde system]]
-#+begin_src scheme :tangle ./config.scm 
+** Base
+This serves as the base config that the rde based modules will be broken out from. The goal is for this file to become minimal declaration that refers to my modules.
+#+begin_src scheme :tangle ./configs.scm 
   (define-module (configs)
     #:use-module (rde features)
     #:use-module (rde features base)
@@ -395,6 +397,7 @@ This is a tempory section the I'm using to refactor my configurations to use [[h
     #:use-module (guix gexp)
     #:use-module (guix inferior)
     #:use-module (guix channels)
+    #:use-module (lattice features emacs)
     #:use-module (ice-9 match))
 
   ;; User-specific features
@@ -428,114 +431,76 @@ This is a tempory section the I'm using to refactor my configurations to use [[h
   ;;; WARNING: The order can be important for features extending
   ;;; service of other features. Be careful chaning it.
   (define %main-features
-    (list
-     (feature-base-services)
-     (feature-desktop-services)
-     (feature-docker)
-     (feature-pipewire)
-     (feature-backlight #:step 5)
+    (append
+     (list
+      (feature-base-services)
+      (feature-desktop-services)
+      (feature-docker)
+      (feature-pipewire)
+      (feature-backlight #:step 5)
 
-     (feature-fonts
-      #:font-monospace (font "Iosevka" #:size 11 #:weight 'regular)
-      #:font-packages (list font-iosevka font-fira-mono))
+      (feature-fonts
+       #:font-monospace (font "Iosevka" #:size 11 #:weight 'regular)
+       #:font-packages (list font-iosevka font-fira-mono))
 
-     (feature-sway
-      #:xwayland? #f
-      #:extra-config
-      `((output DP-2 scale 2)
-	(workspace 9 output DP-2)
-	(workspace 10 output DP-2)
+      (feature-sway
+       #:xwayland? #f
+       #:extra-config
+       `((output DP-2 scale 2)
+	 (workspace 9 output DP-2)
+	 (workspace 10 output DP-2)
 
-	(bindsym
-	 --locked $mod+Shift+p exec
-	 ,(file-append (@ (gnu packages music) playerctl) "/bin/playerctl")
-	 play-pause)
-	(bindsym $mod+Shift+Return exec emacs)))
-     (feature-sway-run-on-tty
-      #:sway-tty-number 2)
-     (feature-sway-screenshot)
-     (feature-waybar
-      #:waybar-modules
-      (list
-       (waybar-sway-workspaces)
-       (waybar-tray)
-       (waybar-idle-inhibitor)
-       (waybar-sway-language)
-       (waybar-battery #:intense? #f)
-       (waybar-clock)))
-     (feature-swayidle)
-     (feature-swaylock
-      #:swaylock (@ (gnu packages wm) swaylock-effects)
-      #:extra-config '((clock)))
-     (feature-rofi)
+	 (bindsym
+	  --locked $mod+Shift+p exec
+	  ,(file-append (@ (gnu packages music) playerctl) "/bin/playerctl")
+	  play-pause)
+	 (bindsym $mod+Shift+Return exec emacs)))
+      (feature-sway-screenshot)
+      (feature-waybar
+       #:waybar-modules
+       (list
+	(waybar-sway-workspaces)
+	(waybar-tray)
+	(waybar-idle-inhibitor)
+	(waybar-sway-language)
+	(waybar-battery #:intense? #f)
+	(waybar-clock)))
+      (feature-swayidle)
+      (feature-swaylock
+       #:swaylock (@ (gnu packages wm) swaylock-effects)
+       #:extra-config '((clock)))
+      (feature-rofi)
 
-     (feature-emacs
-      ;;#:emacs emacs-pgtk-native-comp
-      #:extra-init-el `()
-      #:additional-elisp-packages
-      (append
-       (list emacs-consult-dir)
-       (pkgs "emacs-elfeed" "emacs-hl-todo"
-	     "emacs-ytdl"
-	     "emacs-ement"
-	     "emacs-restart-emacs"
-	     "emacs-org-present"
-	     "emacs-evil-collection"
-	     "emacs-all-the-icons")))
-     (feature-emacs-appearance)
-     (feature-emacs-faces)
-     (feature-emacs-completion
-      #:mini-frame? #t)
-     (feature-emacs-vertico)
-     (feature-emacs-project)
-     (feature-emacs-perspective)
-     (feature-emacs-input-methods)
-     (feature-emacs-which-key)
-     (feature-emacs-keycast #:turn-on? #f)
+      (feature-markdown)
+      (feature-transmission #:auto-start? #f)
 
-     (feature-emacs-dired)
-     (feature-emacs-eshell)
-     (feature-emacs-monocle)
-     (feature-emacs-message)
-     (feature-emacs-elpher)
-     (feature-emacs-pdf-tools)
+      (feature-xdg
+       #:xdg-user-directories-configuration
+       (home-xdg-user-directories-configuration
+	(music "$HOME/music")
+	(videos "$HOME/vids")
+	(pictures "$HOME/pics")
+	(documents "$HOME/docs")
+	(download "$HOME/dl")
+	(desktop "$HOME")
+	(publicshare "$HOME")
+	(templates "$HOME")))
+      (feature-base-packages
+       #:home-packages
+       (append
+	(pkgs
+	 "nyxt"
+	 "ungoogled-chromium-wayland" "ublock-origin-chromium"
 
-     (feature-emacs-git)
-     (feature-emacs-org
-      #:org-directory "~/org")
-     (feature-emacs-org-roam
-      #:org-roam-directory "~/org/slipbox")
-     (feature-emacs-org-agenda
-      #:org-agenda-files '("~/org/todo.org"))
-     (feature-markdown)
-     (feature-transmission #:auto-start? #f)
+	 "jami"
 
-     (feature-xdg
-      #:xdg-user-directories-configuration
-      (home-xdg-user-directories-configuration
-       (music "$HOME/music")
-       (videos "$HOME/vids")
-       (pictures "$HOME/pics")
-       (documents "$HOME/docs")
-       (download "$HOME/dl")
-       (desktop "$HOME")
-       (publicshare "$HOME")
-       (templates "$HOME")))
-     (feature-base-packages
-      #:home-packages
-      (append
-       (pkgs
-	"nyxt"
-	"ungoogled-chromium-wayland" "ublock-origin-chromium"
-
-	"jami"
-
-	"alsa-utils" "youtube-dl" "imv"
-	"pavucontrol" "wev"
-	"hicolor-icon-theme" "adwaita-icon-theme" "gnome-themes-standard"
-	"papirus-icon-theme" "arc-theme"
-	"ffmpeg"
-	"ripgrep" "curl")))))
+	 "alsa-utils" "youtube-dl" "imv"
+	 "pavucontrol" "wev"
+	 "hicolor-icon-theme" "adwaita-icon-theme" "gnome-themes-standard"
+	 "papirus-icon-theme" "arc-theme"
+	 "ffmpeg"
+	 "ripgrep" "curl"))))
+     %lattice-emacs-base-features))
 
   ;;; Hardware/host specific features
 
@@ -584,4 +549,62 @@ This is a tempory section the I'm using to refactor my configurations to use [[h
 	("hal-system" (rde-config-operating-system hal-config)))))
 
   (dispatcher)
+#+end_src
+
+** Emacs
+This module defines my emacs configuration.
+#+begin_src scheme :tangle ./lattice/features/emacs.scm 
+  (define-module (lattice features emacs)
+    #:use-module (guix gexp)
+    #:use-module (gnu home services)
+    #:use-module (gnu services)
+    #:use-module (gnu packages)
+    #:use-module (gnu packages emacs)
+    #:use-module (gnu packages emacs-xyz)
+    #:use-module (rde features)
+    #:use-module (rde features base)
+    #:use-module (rde features emacs)
+    #:export (%lattice-emacs-base-features))
+
+
+  (define* (pkgs #:rest lst)
+    (map specification->package+output lst))
+
+  (define %lattice-emacs-base-features
+    (list
+     (feature-emacs
+      ;;#:emacs emacs-pgtk-native-comp
+      #:extra-init-el `()
+      #:additional-elisp-packages
+      (append
+       (list emacs-consult-dir)
+       (pkgs "emacs-elfeed" "emacs-hl-todo"
+	     "emacs-ytdl"
+	     "emacs-ement"
+	     "emacs-restart-emacs"
+	     "emacs-org-present")))
+     (feature-emacs-appearance)
+     (feature-emacs-faces)
+     (feature-emacs-completion
+      #:mini-frame? #t)
+     (feature-emacs-vertico)
+     (feature-emacs-project)
+     (feature-emacs-perspective)
+     (feature-emacs-input-methods)
+     (feature-emacs-which-key)
+     (feature-emacs-keycast #:turn-on? #f)
+
+     (feature-emacs-dired)
+     (feature-emacs-eshell)
+     (feature-emacs-monocle)
+     (feature-emacs-elpher)
+     (feature-emacs-pdf-tools)
+
+     (feature-emacs-git)
+     (feature-emacs-org
+      #:org-directory "~/org")
+     (feature-emacs-org-roam
+      #:org-roam-directory "~/org/slipbox")
+     (feature-emacs-org-agenda
+      #:org-agenda-files '("~/org/todo.org"))))
 #+end_src
