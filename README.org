@@ -399,7 +399,10 @@ This serves as the base config that the rde based modules will be broken out fro
     #:use-module (guix inferior)
     #:use-module (guix channels)
     #:use-module (lattice features emacs)
+    #:use-module (lattice features wayland)
+    #:use-module (lattice systems)
     #:use-module (ice-9 match))
+
 
   ;; User-specific features
 
@@ -444,48 +447,9 @@ This serves as the base config that the rde based modules will be broken out fro
        #:font-monospace (font "Iosevka" #:size 11 #:weight 'regular)
        #:font-packages (list font-iosevka font-fira-mono))
 
-      (feature-sway
-       #:xwayland? #f
-       #:extra-config
-       `((output DP-2 scale 2)
-	 (workspace 9 output DP-2)
-	 (workspace 10 output DP-2)
-
-	 (bindsym
-	  --locked $mod+Shift+p exec
-	  ,(file-append (@ (gnu packages music) playerctl) "/bin/playerctl")
-	  play-pause)
-	 (bindsym $mod+Shift+Return exec emacs)))
-      (feature-sway-screenshot)
-      (feature-waybar
-       #:waybar-modules
-       (list
-	(waybar-sway-workspaces)
-	(waybar-tray)
-	(waybar-idle-inhibitor)
-	(waybar-sway-language)
-	(waybar-battery #:intense? #f)
-	(waybar-clock)))
-      (feature-swayidle)
-      (feature-swaylock
-       #:swaylock (@ (gnu packages wm) swaylock-effects)
-       #:extra-config '((clock)))
-      (feature-rofi)
-
       (feature-markdown)
       (feature-transmission #:auto-start? #f)
 
-      (feature-xdg
-       #:xdg-user-directories-configuration
-       (home-xdg-user-directories-configuration
-	(music "$HOME/music")
-	(videos "$HOME/vids")
-	(pictures "$HOME/pics")
-	(documents "$HOME/docs")
-	(download "$HOME/dl")
-	(desktop "$HOME")
-	(publicshare "$HOME")
-	(templates "$HOME")))
       (feature-base-packages
        #:home-packages
        (append
@@ -501,7 +465,10 @@ This serves as the base config that the rde based modules will be broken out fro
 	 "papirus-icon-theme" "arc-theme"
 	 "ffmpeg"
 	 "ripgrep" "curl"))))
-     %lattice-emacs-base-features))
+   
+     %lattice-system-base-features
+     %lattice-emacs-base-features
+     %lattice-wayland-config))
 
   ;;; Hardware/host specific features
 
@@ -520,7 +487,7 @@ This serves as the base config that the rde based modules will be broken out fro
     (list
      (feature-host-info
       #:host-name "hal"
-      #:timezone "America/Phoenix")
+      #:timezone %lattice-timezone)
      ;;Setup bootloader
      ;;(feature-bootloader)
      (feature-file-systems
@@ -608,4 +575,59 @@ This module defines my emacs configuration.
       #:org-roam-directory "~/org/slipbox")
      (feature-emacs-org-agenda
       #:org-agenda-files '("~/org/todo.org"))))
+#+end_src
+
+** Wayland
+
+
+#+begin_src scheme :tangle ./lattice/features/emacs.scm 
+  (define-module (lattice features wayland)
+    #:use-module (guix gexp)
+    #:use-module (gnu home services)
+    #:use-module (srfi srfi-1)
+    #:use-module (gnu services)
+    #:use-module (gnu services xorg)
+    #:use-module (gnu packages wm)
+    #:use-module (gnu packages image)
+    #:use-module (gnu packages admin)
+    #:use-module (gnu packages xdisorg)
+    #:use-module (gnu packages terminals)
+    #:use-module (gnu packages freedesktop)
+    #:use-module (gnu home services shepherd)
+    #:use-module (rde features)
+    #:use-module (rde features fontutils)
+    #:use-module (rde features predicates)
+    #:use-module (rde features wm)
+  
+    #:export (%lattice-wayland-config))
+
+  (define-public %lattice-wayland-config
+    (list
+      (feature-sway
+       #:xwayland? #f
+       #:extra-config
+       `((output DP-2 scale 2)
+	 (workspace 9 output DP-2)
+	 (workspace 10 output DP-2)
+   
+	 (bindsym
+	  --locked $mod+Shift+p exec
+	  ,(file-append (@ (gnu packages music) playerctl) "/bin/playerctl")
+	  play-pause)
+	 (bindsym $mod+Shift+Return exec emacs)))
+      (feature-sway-screenshot)
+      (feature-waybar
+       #:waybar-modules
+       (list
+	(waybar-sway-workspaces)
+	(waybar-tray)
+	(waybar-idle-inhibitor)
+	(waybar-sway-language)
+	(waybar-battery #:intense? #f)
+	(waybar-clock)))
+      (feature-swayidle)
+      (feature-swaylock
+       #:swaylock (@ (gnu packages wm) swaylock-effects)
+       #:extra-config '((clock)))))
+
 #+end_src
