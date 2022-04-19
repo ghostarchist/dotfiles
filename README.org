@@ -469,7 +469,7 @@ This serves as the base config that the rde based modules will be broken out fro
    
      %lattice-system-base-features
      %lattice-emacs-base-features
-     %lattice-wayland-config))
+     %lattice-dwl-config))
 
   ;;; Hardware/host specific features
 
@@ -674,7 +674,7 @@ This module defines my emacs configuration.
 ** Wayland
 
 
-#+begin_src scheme :tangle ./lattice/features/emacs.scm 
+#+begin_src scheme :tangle ./lattice/features/wayland.scm 
   (define-module (lattice features wayland)
     #:use-module (guix gexp)
     #:use-module (gnu home services)
@@ -692,10 +692,86 @@ This module defines my emacs configuration.
     #:use-module (rde features fontutils)
     #:use-module (rde features predicates)
     #:use-module (rde features wm)
+    #:use-module (lattice utils)
+    #:use-module (lattice systems)
+    #:use-module (dwl-guile utils)
+    #:use-module (dwl-guile patches)
+    #:use-module (dwl-guile home-service)
+    #:use-module (dwl-guile configuration)
+    #:use-module (dwl-guile configuration default-config)
   
-    #:export (%lattice-wayland-config))
+    #:export (
+	      %lattice-dwl-config
+	      %lattice-sway-config))
 
-  (define-public %lattice-wayland-config
+  (define %lattice-dwl-guile-patches
+    (list %patch-xwayland
+	  %patch-swallow
+	  %patch-movestack
+	  %patch-attachabove))
+
+  (define %lattice-dwl-guile-config
+    (dwl-config
+     (xkb-rules %lattice-keyboard-layout)
+     (border-px 2)
+     (rules
+      (list
+       (dwl-rule (id "emacs")
+		 (title "emacs")
+		 (alpha 0.9))))
+     (keys
+      (append
+       (list
+	(dwl-key
+	 (key "s-0")
+	 (action '(dwl:cycle-layout)))
+	(dwl-key
+	 (key "s-<tab>")
+	 (action '(dwl:view-previous))))
+       %dwl-base-keys))
+     (colors
+      (dwl-colors
+       (root "#191919")
+       (border "#808080")
+       (focus "#FFCC00")))))
+
+  ;; Checks if SYMBOL corresponds to a patch that is/will
+  ;; be applied to dwl-guile, based on the features values in CONFIG.
+  ;; SYMBOL should be the name of the patch, not including the ".patch" extension.
+  ;; I.E @code{(has-dwl-patch? 'xwayland config)}.
+  (define (has-dwl-patch? symbol config)
+    (let ((patch-name (string-append (symbol->string symbol) ".patch")))
+      (find (lambda (p) (equal? patch-name (local-file-name p)))
+	    (get-value 'dwl-guile-patches config))))
+
+  (define* (feature-wayland-dwl-guile
+	    #:key
+	    (dwl-guile-configuration (home-dwl-guile-configuration)))
+    "Setup dwl-guile."
+    (ensure-pred home-dwl-guile-configuration? dwl-guile-configuration)
+    (define (get-home-services config)
+      "Return a list of home services required by dwl."
+      (list
+       (service home-dwl-guile-service-type
+		dwl-guile-configuration)))
+
+    (feature
+     (name 'wayland-dwl-guile)
+     (values `((wayland . #t)
+	       (dwl-guile . #t)
+	       (dwl-guile-patches
+		. ,(home-dwl-guile-configuration-patches dwl-guile-configuration))))
+     (home-services-getter get-home-services)))
+
+  (define-public %lattice-dwl-config
+    (list
+     (feature-wayland-dwl-guile
+      #:dwl-guile-configuration
+      (home-dwl-guile-configuration
+       (patches %lattice-dwl-guile-patches)
+       (config %lattice-dwl-guile-config)))))
+
+  (define-public %lattice-sway-config
     (list
       (feature-sway
        #:xwayland? #f
