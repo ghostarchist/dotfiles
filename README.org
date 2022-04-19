@@ -40,7 +40,8 @@ These configurations utilize [[https://git.sr.ht/~abcdw/rde][Tropin's rde system
 #+END_SRC
 * Base
 This serves as the base config that the rde based modules will be broken out from. The goal is for this file to become minimal declaration that refers to my modules.
-#+begin_src scheme :tangle ./configs.scm 
+#+begin_src scheme :tangle ./configs.scm :noweb yes 
+  ;;<<file-warning>>
   (define-module (configs)
     #:use-module (rde features)
     #:use-module (rde features base)
@@ -145,7 +146,7 @@ This serves as the base config that the rde based modules will be broken out fro
 	 "papirus-icon-theme" "arc-theme"
 	 "ffmpeg"
 	 "ripgrep" "curl"))))
-   
+
      %lattice-system-base-features
      %lattice-emacs-base-features
      %lattice-dwl-config))
@@ -201,7 +202,8 @@ This serves as the base config that the rde based modules will be broken out fro
 
 * Emacs
 This module defines my emacs configuration.
-#+begin_src scheme :tangle ./lattice/features/emacs.scm 
+#+begin_src scheme :tangle ./lattice/features/emacs.scm noweb: yes
+  ;;<<file-warning>>
   (define-module (lattice features emacs)
     #:use-module (guix gexp)
     #:use-module (gnu home services)
@@ -212,7 +214,7 @@ This module defines my emacs configuration.
     #:use-module (rde features)
     #:use-module (rde features base)
     #:use-module (rde features emacs)
-  
+
     #:export (%lattice-emacs-base-features))
 
   (define* (make-emacs-feature base-name
@@ -353,7 +355,8 @@ This module defines my emacs configuration.
 * Wayland
 
 
-#+begin_src scheme :tangle ./lattice/features/wayland.scm 
+#+begin_src scheme :tangle ./lattice/features/wayland.scm noweb: yes
+  ;;<<file-warning>>
   (define-module (lattice features wayland)
     #:use-module (guix gexp)
     #:use-module (gnu home services)
@@ -378,7 +381,7 @@ This module defines my emacs configuration.
     #:use-module (dwl-guile home-service)
     #:use-module (dwl-guile configuration)
     #:use-module (dwl-guile configuration default-config)
-  
+
     #:export (
 	      %lattice-dwl-config
 	      %lattice-sway-config))
@@ -458,7 +461,7 @@ This module defines my emacs configuration.
        `((output DP-2 scale 2)
 	 (workspace 9 output DP-2)
 	 (workspace 10 output DP-2)
-   
+
 	 (bindsym
 	  --locked $mod+Shift+p exec
 	  ,(file-append (@ (gnu packages music) playerctl) "/bin/playerctl")
@@ -483,7 +486,8 @@ This module defines my emacs configuration.
 * Utils
 This defines some utilities for building custom features, stolen from [[https://github.com/engstrand-config/guix-dotfiles][Engstrands' configs]].
 
-#+begin_src scheme :tangle ./lattice/utils.scm
+#+begin_src scheme :tangle ./lattice/utils.scm noweb: yes
+  ;;<<file-warning>>
   (define-module (lattice utils)
     #:use-module (ice-9 match)
     #:use-module (srfi srfi-1)
