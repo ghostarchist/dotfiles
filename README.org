@@ -449,6 +449,7 @@ This serves as the base config that the rde based modules will be broken out fro
 
       (feature-markdown)
       (feature-transmission #:auto-start? #f)
+      (feature-ssh)
 
       (feature-base-packages
        #:home-packages
