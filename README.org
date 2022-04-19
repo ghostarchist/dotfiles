@@ -32,334 +32,13 @@ Reproducible GuixSD dotfiles
 #+end_src
 This is my personal configuration for [[https://linux.org][GNU/Linux]] systems. It enables a consistent experience and computing environment across all of my machines. This project is written with [[https://gnu.org/software/emacs/][GNU/Emacs]], leveraging its capabilities for [[https://doi.org/10.1093/comjnl/27.2.97][Literate Programming]], a technique where programs are written in a natural language, such as English, interspersed with snippets of code to describe a software project.
 I used "lattice" as my module name as a play on a structure to control my GNU/Guix herd.
+These configurations utilize [[https://git.sr.ht/~abcdw/rde][Tropin's rde system]] and are heavily inspired by [[https://github.com/engstrand-config/guix-dotfiles][Engstrands' guix-dotfiles]] to make as much of the system configurable by guile as possible.
 #+NAME: file-warning
 #+BEGIN_SRC text
     This file is controlled by /etc/dotfiles/README.org
     ALL CHANGES ARE FUTILE!
 #+END_SRC
-* Systems
-These are the config files for each indiviual locally managed systems, remote systems (VPSs) are managed through ~guix deploy~ and docmented under ~Deployments~
-** HalX220
-#+begin_src scheme :tangle ./hal.scm
-    (define-module ( systems hal)
-      #:use-module (gnu)
-      #:use-module (srfi srfi-1)
-      #:use-module (gnu system nss)
-      #:use-module (gnu system shadow)
-      #:use-module (gnu services authentication)
-      #:use-module (gnu services pm)
-      #:use-module (gnu services desktop)
-      #:use-module (gnu services docker)
-      #:use-module (gnu services networking)
-      #:use-module (gnu services virtualization)
-      #:use-module (gnu services syncthing)
-      #:use-module (gnu packages wm)
-      #:use-module (gnu packages gtk)
-      #:use-module (gnu packages xorg)
-      #:use-module (gnu packages emacs)
-      #:use-module (gnu packages mtools)
-      #:use-module (gnu packages linux)
-      #:use-module (gnu packages audio)
-      #:use-module (gnu packages gnuzilla)
-      #:use-module (gnu packages pulseaudio)
-      #:use-module (gnu packages web-browsers)
-      #:use-module (gnu packages version-control)
-      #:use-module (gnu packages package-management))
-
-  (use-modules (gnu))
-    (use-service-modules nix)
-    (use-service-modules desktop xorg)
-    (use-package-modules shells)
-    (use-service-modules desktop networking ssh xorg)
-
-    (operating-system
-      (locale "en_US.utf8")
-      (timezone "America/Phoenix")
-      (keyboard-layout (keyboard-layout "us" #:options '("ctrl:swapcaps")))
-      (host-name "hal")
-      (users (cons* (user-account
-                      (name "jak")
-                      (comment "Jak")
-                      (group "users")
-                      (home-directory "/home/jak")
-                      (supplementary-groups
-                       '("wheel" "netdev" "audio" "video")))
-                    (user-account
-                     (name "nixbld0")
-                     (group "nixbld")
-                     (create-home-directory? #f)
-                     (shell "$(which nologin)")
-                     (system? #t))
-                    %base-user-accounts))
-
-      (packages
-        (append
-         (map specification->package
-              '("emacs"
-                "emacs-exwm"
-                "emacs-desktop-environment"
-                "git"
-                "nix"
-                "gstreamer"
-                "sbcl"
-                "stumpwm"
-                "font-dejavu"
-                "nss-certs"))
-          %base-packages))
-      (services
-        (cons*  (service openssh-service-type)
-                (service tor-service-type)
-                  (service nix-service-type)
-                (service syncthing-service-type
-                         (syncthing-configuration (user "jak")))
-                (set-xorg-configuration
-                  (xorg-configuration
-                   (keyboard-layout keyboard-layout)))
-          %desktop-services))
-      (bootloader
-        (bootloader-configuration
-          (bootloader grub-efi-bootloader)
-          (target "/boot/efi")
-          (keyboard-layout keyboard-layout)))
-      (swap-devices
-        (list (swap-space (target (uuid "40d7cd81-4f31-4ddf-9769-7948ed9eb589")))))
-      (file-systems
-        (cons* (file-system
-                 (mount-point "/boot/efi")
-                 (device (uuid "0351-5D8F" 'fat32))
-                 (type "vfat"))
-               (file-system
-                (mount-point "/")
-                 (device
-                   (uuid "01ccdad1-366b-4d8d-92e8-30315e87e8b9"
-                         'ext4))
-                 (type "ext4"))
-               %base-file-systems)))
-
-#+end_src
-
-This is my personal guix home configuration that configures guix home for my user account.
-#+begin_src scheme :tangle ./home.scm
-  ;; This "home-environment" file can be passed to 'guix home reconfigure'
-  ;; to reproduce the content of your profile.  This is "symbolic": it only
-  ;; specifies package names.  To reproduce the exact same profile, you also
-  ;; need to capture the channels being used, as returned by "guix describe".
-  ;; See the "Replicating Guix" section in the manual.
-
-  (use-modules
-    (gnu home)
-    (gnu packages)
-    (gnu services)
-    (guix gexp)
-    (gnu home services shells)
-    (gnu home services desktop)
-    (rde features))
-
-  (home-environment
-    (packages
-      (map specification->package
-           (list "emacs-evil-collection"
-                 "emacs-org-bullets"
-                 "nyxt"
-                 "emacs-org-roam"
-                 "git"
-                 "emacs"
-                 "emacs-exwm"
-                 "emacs-ytdl"
-                 "youtube-dl"
-                 "emacs-emms"
-                 "stow"
-                 "emacs-yasnippet"
-                 "emacs-counsel"
-                 "emacs-smartparens"
-                 "emacs-rainbow-delimiters"
-                 "emacs-minions"
-                 "emacs-vertico"
-                 "emacs-doom-modeline"
-                 "emacs-projectile"
-                 "emacs-all-the-icons"
-                 "emacs-orderless"
-                 "font-fira-code"
-                 "neovim"
-                 "font-liberation"
-                 "font-libertinus"
-                 "font-linuxlibertine"
-                 "emacs-use-package"
-                 "emacs-no-littering"
-                 "emacs-desktop-environment"
-                 "emacs-dashboard"
-                 "emacs-evil"
-                 "emacs-undo-tree"
-                 "emacs-which-key"
-                 "emacs-general"
-                 "emacs-doom-themes"
-                 "emacs-helpful"
-                 "emacs-hydra"
-                 "emacs-corfu"
-                 "emacs-consult"
-                 "emacs-marginalia"
-                 "emacs-embark"
-                 "emacs-hl-todo"
-                 "emacs-deft"
-                 "emacs-org-appear"
-                 "emacs-magit"
-                 "emacs-lsp-mode"
-                 "emacs-lsp-ui"
-                 "emacs-geiser"
-                 "sbcl"
-                 "emacs-sly"
-                 "emacs-slime"
-                 "emacs-cider"
-                 "emacs-js2-mode"
-                 "emacs-web-mode"
-                 "emacs-calfw"
-                 "emacs-eshell-z"
-                 "emacs-esh-autosuggest"
-                 "emacs-xterm-color"
-                 "emacs-exec-path-from-shell"
-                 "emacs-fish-completion"
-                 "emacs-eshell-syntax-highlighting"
-                 "emacs-eshell-toggle"
-                 "emacs-vterm"
-                 "emacs-tracking"
-                 "emacs-erc-image"
-                 "emacs-erc-hl-nicks"
-                 "emacs-elfeed"
-                 "emacs-nov-el"
-                 "emacs-elpher"
-                 "emacs-guix"
-                 "emacs-daemons"
-                 "emacs-pulseaudio-control"
-                 "emacs-docker"
-                 "emacs-docker-tramp"
-                 "emacs-dockerfile-mode")))
-    (services
-      (list (service
-              home-bash-service-type
-              (home-bash-configuration
-                (aliases
-                  '(("grep='grep --color" . "auto")
-                    ("ll" . "ls -l")
-                    ("ls='ls -p --color" . "auto")))
-                (bashrc
-                  (list (local-file
-                          "/home/jak/.bashrc"
-                          "bashrc")))
-                (bash-profile
-                  (list (local-file
-                          "/home/jak/.bash_profile"
-                          "bash_profile")))))
-            (service home-redshift-service-type
-                     (home-redshift-configuration
-                      (location-provider 'manual)
-                      (latitude 33.3528)
-                      (longitude -111.8016)
-                      (daytime-temperature 6500)
-                      (nighttime-temperature 3000)
-                      (daytime-brightness 1.0)
-                      (nighttime-brightness 0.3))))))
-
-#+end_src
-
-#+begin_src scheme ./lattice/features/emacs.scm
-  (define-module (lattice features emacs)
-    #:use-module (gnu packages)
-    #:use-module (gnu packages emacs)
-    #:use-module (gnu packages emacs-xyz)
-    #:use-module (gnu services)
-    #:use-module (gnu home-services emacs)
-    #:use-module (gnu home-services files)
-    #:use-module (guix packages)
-    #:use-module (guix gexp)
-    #:use-module (guix inferior)
-    #:use-module (guix channels)
-    #:use-module (guix transformations)
-    #:use-module (guix download)
-    #:use-module (guix git-download)
-    #:use-module (guix build-system)
-    #:use-module (guix build-system emacs)
-    #:use-module (guix build utils)
-    #:use-module (guix build-system copy)
-    #:use-module (guix build copy-build-system)
-    #:use-module ((guix licenses) #:prefix license:)
-    #:use-module (flat packages emacs)
-    #:use-module (srfi srfi-11))
-
-  (define emacs-packages
-    (list "emacs-evil-collection"
-          "emacs-org-bullets"
-          "emacs-ytdl"
-          "emacs-emms"
-          "emacs-yasnippet"
-          "emacs-counsel"
-          "emacs-smartparens"
-          "emacs-rainbow-delimiters"
-          "emacs-minions"
-          "emacs-vertico"
-          "emacs-doom-modeline"
-          "emacs-projectile"
-          "emacs-all-the-icons"
-          "emacs-orderless"
-          "emacs-use-package"
-          "emacs-no-littering"
-          "emacs-desktop-environment"
-          "emacs-dashboard"
-          "emacs-evil"
-          "emacs-undo-tree"
-          "emacs-which-key"
-          "emacs-general"
-          "emacs-doom-themes"
-          "emacs-helpful"
-          "emacs-hydra"
-          "emacs-corfu"
-          "emacs-consult"
-          "emacs-marginalia"
-          "emacs-embark"
-          "emacs-hl-todo"
-          "emacs-deft"
-          "emacs-org-appear"
-          "emacs-magit"
-          "emacs-lsp-mode"
-          "emacs-lsp-ui"
-          "emacs-geiser"
-          "emacs-sly"
-          "emacs-slime"
-          "emacs-cider"
-          "emacs-js2-mode"
-          "emacs-web-mode"
-          "emacs-calfw"
-          "emacs-eshell-z"
-          "emacs-esh-autosuggest"
-          "emacs-xterm-color"
-          "emacs-exec-path-from-shell"
-          "emacs-fish-completion"
-          "emacs-eshell-syntax-highlighting"
-          "emacs-eshell-toggle"
-          "emacs-vterm"
-          "emacs-tracking"
-          "emacs-erc-image"
-          "emacs-erc-hl-nicks"
-          "emacs-elfeed"
-          "emacs-nov-el"
-          "emacs-elpher"
-          "emacs-guix"
-          "emacs-daemons"
-          "emacs-pulseaudio-control"
-          "emacs-docker"
-          "emacs-docker-tramp"
-          "emacs-dockerfile-mode"))
-
-  (define-public emacs-service
-    (list (service home-emacs-service-type
-                   (home-emacs-configuration
-                    (package emacs-pgtk-native-comp)
-                    (server-mode #t)
-                    (elisp-packages emacs-packages)))))
-
-#+e
-* RDE Refactor
-This is a tempory section the I'm using to refactor my configurations to use [[https://git.sr.ht/~abcdw/rde][Tropin's rde system]]
-** Base
+* Base
 This serves as the base config that the rde based modules will be broken out from. The goal is for this file to become minimal declaration that refers to my modules.
 #+begin_src scheme :tangle ./configs.scm 
   (define-module (configs)
@@ -520,7 +199,7 @@ This serves as the base config that the rde based modules will be broken out fro
   (dispatcher)
 #+end_src
 
-** Emacs
+* Emacs
 This module defines my emacs configuration.
 #+begin_src scheme :tangle ./lattice/features/emacs.scm 
   (define-module (lattice features emacs)
@@ -671,7 +350,7 @@ This module defines my emacs configuration.
       #:org-agenda-files '("~/org/todo.org"))))
 #+end_src
 
-** Wayland
+* Wayland
 
 
 #+begin_src scheme :tangle ./lattice/features/wayland.scm 
@@ -801,7 +480,7 @@ This module defines my emacs configuration.
        #:extra-config '((clock)))))
 #+end_src
 
-** Utils
+* Utils
 This defines some utilities for building custom features, stolen from [[https://github.com/engstrand-config/guix-dotfiles][Engstrands' configs]].
 
 #+begin_src scheme :tangle ./lattice/utils.scm
