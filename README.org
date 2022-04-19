@@ -387,6 +387,7 @@ This serves as the base config that the rde based modules will be broken out fro
     #:use-module (rde features markup)
     #:use-module (rde features networking)
     #:use-module (gnu services)
+    #:use-module (gnu system)
     #:use-module (gnu system keyboard)
     #:use-module (gnu system file-systems)
     #:use-module (gnu system mapped-devices)
@@ -429,7 +430,7 @@ This serves as the base config that the rde based modules will be broken out fro
     (map get-inferior-pkg lst))
 
   ;;; WARNING: The order can be important for features extending
-  ;;; service of other features. Be careful chaning it.
+  ;;; service of other features. Be careful changing it.
   (define %main-features
     (append
      (list
