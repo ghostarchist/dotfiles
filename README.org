@@ -38,6 +38,7 @@ These configurations utilize [[https://git.sr.ht/~abcdw/rde][Tropin's rde system
     This file is controlled by /etc/dotfiles/README.org
     ALL CHANGES ARE FUTILE!
 #+END_SRC
+
 * Base
 This serves as the base config that the rde based modules will be broken out from. The goal is for this file to become minimal declaration that refers to my modules.
 #+begin_src scheme :tangle ./configs.scm :noweb yes 
@@ -202,7 +203,7 @@ This serves as the base config that the rde based modules will be broken out fro
 
 * Emacs
 This module defines my emacs configuration.
-#+begin_src scheme :tangle ./lattice/features/emacs.scm noweb: yes
+#+begin_src scheme :noweb yes :tangle ./lattice/features/emacs.scm
   ;;<<file-warning>>
   (define-module (lattice features emacs)
     #:use-module (guix gexp)
@@ -354,8 +355,7 @@ This module defines my emacs configuration.
 
 * Wayland
 
-
-#+begin_src scheme :tangle ./lattice/features/wayland.scm noweb: yes
+#+begin_src scheme :noweb yes :tangle ./lattice/features/wayland.scm
   ;;<<file-warning>>
   (define-module (lattice features wayland)
     #:use-module (guix gexp)
@@ -486,7 +486,7 @@ This module defines my emacs configuration.
 * Utils
 This defines some utilities for building custom features, stolen from [[https://github.com/engstrand-config/guix-dotfiles][Engstrands' configs]].
 
-#+begin_src scheme :tangle ./lattice/utils.scm noweb: yes
+#+begin_src scheme :noweb yes :tangle ./lattice/utils.scm
   ;;<<file-warning>>
   (define-module (lattice utils)
     #:use-module (ice-9 match)
