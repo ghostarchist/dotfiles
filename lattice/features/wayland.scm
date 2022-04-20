@@ -156,6 +156,89 @@
    (name 'wayland-mako)
    (home-services-getter get-home-services)))
 
+(define* (feature-wayland-foot
+          #:key
+          (package foot)
+          (set-default-terminal? #t)
+          (window-alpha 0.9)
+          (swallow-clients? #t)) ;; TODO: Add swallow patch automatically if #t?
+  "Setup foot terminal."
+
+  (ensure-pred package? package)
+  (ensure-pred boolean? set-default-terminal?)
+  (ensure-pred number? window-alpha)
+  (ensure-pred boolean? swallow-clients?)
+
+  (define (get-home-services config)
+    "Return a list of home services required by foot."
+    (require-value 'font-monospace config)
+    (let ((has-dwl-guile? (get-value 'dwl-guile config)))
+      (make-service-list
+       (simple-service
+        'add-foot-home-packages-to-profile
+        home-profile-service-type
+        (list package))
+       (simple-service
+        'create-foot-config
+        home-files-service-type
+        `((".config/foot/foot.ini"
+           ,(alist->ini "foot-config"
+                        `(("pad" . "5x5")
+                          ("font" . "monospace:size=12")
+                          ("dpi-aware" . "no")
+                          ;; Certain TUI programs prefer "xterm"
+                          ("term" . "xterm")
+
+                          ("[key-bindings]")
+                          ("scrollback-up-line" . "Mod1+k")
+                          ("scrollback-down-line" . "Mod1+j")
+                          ("clipboard-copy" . "Mod1+c")
+                          ("clipboard-paste" . "Mod1+v")
+                          ("search-start" . "Mod1+s")
+                          ("font-increase" . "Mod1+Control+k")
+                          ("font-decrease" . "Mod1+Control+j")
+                          ("font-reset" . "Mod1+Control+0")
+                          ;; This should be defined in dwl.
+                          ("spawn-terminal" . "Mod1+Shift+Return")
+                          ("show-urls-launch" . "Mod1+u")
+                          ("show-urls-copy" . "Mod1+Control+u")
+
+                          ("[search-bindings]")
+                          ("find-prev" . "Mod1+p")
+                          ("find-next" . "Mod1+n")
+                          ("cursor-left" . "Mod1+h")
+                          ("cursor-right" . "Mod1+l")
+                          ("cursor-left-word" . "Mod1+b")
+                          ("cursor-right-word" . "Mod1+w")
+                          ("cursor-home" . "Mod1+i")
+                          ("cursor-end" . "Mod1+a")
+                          ("clipboard-paste" . "Mod1+v")
+
+                          ("[mouse-bindings]")
+                          ("select-begin-block" . "none")
+                          ("select-word-whitespace" . "Mod1+BTN_LEFT-2"))))))
+       (when (and set-default-terminal? has-dwl-guile?)
+         (simple-service
+          'set-foot-as-default-terminal
+          home-dwl-guile-service-type
+          (modify-dwl-guile-config
+           (config =>
+                   (dwl-config
+                    (inherit config)
+                    (rules
+                     (append
+                      (list
+                       (dwl-rule
+                        (id "foot")
+                        (alpha  window-alpha)
+                        (no-swallow (not swallow-clients?))
+                        (terminal swallow-clients?)))
+                      (dwl-config-rules config)))))))))))
+  (feature
+   (name 'wayland-foot)
+   (home-services-getter get-home-services)))
+
+
 (define-public %lattice-dwl-config
   (list
    (feature-wayland-dwl-guile
@@ -163,4 +246,5 @@
     (home-dwl-guile-configuration
      (patches %lattice-dwl-guile-patches)
      (config %lattice-dwl-guile-config)))
-   (feature-wayland-mako)))
+   (feature-wayland-mako)
+   (feature-wayland-foot)))
