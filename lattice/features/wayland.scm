@@ -395,6 +395,73 @@
              (dtao-guile . #t)))
    (home-services-getter get-home-services)))
 
+(define* (feature-wayland-bemenu
+          #:key
+          (set-default-menu? #t))
+  "Setup bemenu."
+
+  (ensure-pred boolean? set-default-menu?)
+
+  (define (get-home-services config)
+    "Return a list of home services required by bemenu."
+    (require-value 'font-monospace config)
+    (make-service-list
+     (simple-service
+      'add-bemenu-home-package-to-profile
+      home-profile-service-type
+      (list bemenu))
+     (when (and set-default-menu? (get-value 'dwl-guile config))
+       (simple-service
+        'set-bemenu-as-default-menu
+        home-dwl-guile-service-type
+        (modify-dwl-guile-config
+         (config =>
+                 (dwl-config
+                  (inherit config)
+                  (menu `(,(file-append bemenu "/bin/bemenu-run"))))))))
+     (simple-service
+      'bemenu-options
+      home-environment-variables-service-type
+      (alist->environment-variable
+       "BEMENU_OPTS"
+       `(("ignorecase" . #t)
+         ("line-height"
+          . ,(get-value 'statusbar-height config 25))
+         ("filter" . #f)
+         ("wrap" . #f)
+         ("list" . #f)
+         ("prompt" #f)
+         ("prefix" . #f)
+         ("index" . #f)
+         ("password" . #f)
+         ("scrollbar" . #f)
+         ("ifne" . #f)
+         ("fork" . #f)
+         ("no-exec" . #f)
+         ("bottom" . #f)
+         ("grab" . #f)
+         ("no-overlap" . #f)
+         ("monitor" . #f)
+         ("fn"
+          . ,(font->string 'pango 'font-monospace config
+                           #:bold? #t
+                           #:size 10))
+         ("tb" . "#FFCC00")
+         ("tf" . "#000000")
+         ("fb" . "#1A1A1A")
+         ("ff" . "#FFFFFF")
+         ("nb" . "#1A1A1A")
+         ("nf" . "#FFFFFF")
+         ("hb" . "#1A1A1A")
+         ("hf" . "#FFCC00")
+         ("sb" . #f)
+         ("sf" . #f)
+         ("scb" . #f)
+         ("scf" . #f))))))
+  (feature
+   (name 'wayland-bemenu)
+   (home-service-getter get-home-services)))
+
 (define-public %lattice-dwl-config
   (list
    (feature-wayland-dwl-guile
