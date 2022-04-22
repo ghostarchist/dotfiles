@@ -460,7 +460,7 @@
          ("scf" . #f))))))
   (feature
    (name 'wayland-bemenu)
-   (home-service-getter get-home-services)))
+   (home-services-getter get-home-services)))
 
 (define-public %lattice-dwl-config
   (list
