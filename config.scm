@@ -40,6 +40,7 @@
   #:use-module (lattice features emacs)
   #:use-module (lattice features wayland)
   #:use-module (lattice systems)
+  #:use-module (lattice users jak)
   #:use-module (ice-9 match))
 
 
@@ -141,7 +142,7 @@
   (rde-config
    (features
     (append
-     %jak-features
+     %user-features
      %main-features
      %hal-features))))
 

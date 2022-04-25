@@ -83,6 +83,7 @@ This serves as the base config that the rde based modules will be broken out fro
     #:use-module (lattice features emacs)
     #:use-module (lattice features wayland)
     #:use-module (lattice systems)
+    #:use-module (lattice users jak)
     #:use-module (ice-9 match))
 
 
@@ -184,7 +185,7 @@ This serves as the base config that the rde based modules will be broken out fro
     (rde-config
      (features
       (append
-       %jak-features
+       %user-features
        %main-features
        %hal-features))))
 
@@ -203,7 +204,7 @@ This serves as the base config that the rde based modules will be broken out fro
   (dispatcher)
 #+end_src
 
-     #+begin_src scheme :noweb yes :tangle ./lattice/configs.scm
+#+begin_src scheme :noweb yes :tangle ./lattice/configs.scm
        (define-module (lattice configs)
          #:use-module (guix gexp)
          #:use-module (gnu packages fonts)
