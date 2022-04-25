@@ -322,7 +322,7 @@ This module defines common properties between my systems.
 ** Hal
 This contains the configurations specific to my Thinkpad X220
 
-     #+begin_src scheme :noweb yes :tangle ./lattice/systems.scm
+     #+begin_src scheme :noweb yes :tangle ./lattice/systems/hal.scm
        (define-module (lattice systems hal)
                 #:use-module (lattice utils)
                 #:use-module (lattice systems)
