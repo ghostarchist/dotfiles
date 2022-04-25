@@ -358,7 +358,33 @@ This contains the configurations specific to my Thinkpad X220
                      (uuid "01ccdad1-366b-4d8d-92e8-30315e87e8b9"))
                     (type "ext4"))))))
      #+end_src
-* Emacs
+* Users
+** Jak
+
+ #+begin_src scheme :noweb yes :tangle ./lattice/users/jak.scm
+   (define-module (lattice users jak)
+     #:use-module (rde features)
+     #:use-module (rde features ssh)
+     #:use-module (rde features base)
+     #:use-module (rde features gnupg)
+     #:use-module (gnu services)
+     #:use-module (gnu services databases)
+     #:use-module (gnu home-services ssh)
+     #:use-module (lattice utils)
+     #:use-module (lattice configs)
+     #:use-module (lattice features emacs)
+     #:use-module (lattice features wayland))
+
+   (define-public %user-features
+     (append
+      (list
+       (feature-user-info
+        #:user-name "jak"
+        #:full-name "Jacob Boldman"
+        #:email "jacob@boldman.co"))))
+#+end_src
+* Features
+** Emacs
 This module defines my emacs configuration.
 #+begin_src scheme :noweb yes :tangle ./lattice/features/emacs.scm
   ;;<<file-warning>>
