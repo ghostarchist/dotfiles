@@ -27,7 +27,16 @@
   #:use-module (dtao-guile home-service)
 
   #:export (
-            %lattice-dwl-config))
+            feature-wayland-dwl-guile
+            feature-wayland-bemenu
+            feature-wayland-foot
+            feature-wayland-mako
+            feature-wayland-wlsunset
+            feature-wayland-dtao-guile
+
+
+            %lattice-dwl-guile-patches
+            %lattice-dwl-guile-config))
 
 
 (define %lattice-dwl-guile-patches
