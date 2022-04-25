@@ -11,24 +11,24 @@
   #:use-module (rde features system)
   #:use-module (rde features keyboard)
   #:export (
-	    %lattice-timezone
-	    %lattice-locale
-	    %lattice-kernel-arguments
-	    %lattice-keyboard-layout
-	    %lattice-initial-os
-	    %lattice-system-base-features))
+            %lattice-timezone
+            %lattice-locale
+            %lattice-kernel-arguments
+            %lattice-keyboard-layout
+            %lattice-initial-os
+            %lattice-system-base-features))
 
 (define-public %lattice-timezone "America/Phoenix")
 (define-public %lattice-locale "en_US.utf8")
 
 (define-public %lattice-kernel-arguments
   (list "modprobe.blacklist=pcspkr,snd_pcsp"
-	"quiet"))
+        "quiet"))
 
 (define-public %lattice-keyboard-layout
   (keyboard-layout "us"
-		   #:options
-		   '("ctrl:swapcaps")))
+                   #:options
+                   '("ctrl:swapcaps")))
 
 (define-public %lattice-initial-os
   (operating-system
@@ -38,8 +38,8 @@
    (kernel-arguments %lattice-kernel-arguments)
    (keyboard-layout %lattice-keyboard-layout)
    (bootloader (bootloader-configuration
-		(bootloader grub-efi-bootloader)
-		(targets '("/boot/efi"))))
+                (bootloader grub-efi-bootloader)
+                (targets '("/boot/efi"))))
    (services '())
    (file-systems %base-file-systems)
    (issue "This is the GNU/Lattice system.\n")))

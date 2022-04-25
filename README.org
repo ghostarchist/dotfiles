@@ -80,9 +80,9 @@ This serves as the base config that the rde based modules will be broken out fro
     #:use-module (guix inferior)
     #:use-module (guix channels)
     #:use-module (lattice systems)
+    #:use-module (lattice systems hal)
     #:use-module (lattice features emacs)
     #:use-module (lattice features wayland)
-    #:use-module (lattice systems)
     #:use-module (lattice users jak)
     #:use-module (ice-9 match))
 
@@ -177,7 +177,7 @@ This serves as the base config that the rde based modules will be broken out fro
       (append
        %user-features
        %main-features
-       %hal-features))))
+       %system-features))))
 
   (define-public hal-os
     (rde-config-operating-system hal-config))
@@ -261,53 +261,53 @@ This module defines common properties between my systems.
      #+begin_src scheme :noweb yes :tangle ./lattice/systems.scm 
        ;;<<file-warning>>
        (define-module (lattice systems)
-	 #:use-module (gnu system)
-	 #:use-module (gnu system keyboard)
-	 #:use-module (gnu system file-systems)
-	 #:use-module (gnu bootloader)
-	 #:use-module (gnu bootloader grub)
-	 #:use-module (rde features)
-	 #:use-module (rde features base)
-	 #:use-module (rde features system)
-	 #:use-module (rde features keyboard)
-	 #:export (
-		   %lattice-timezone
-		   %lattice-locale
-		   %lattice-kernel-arguments
-		   %lattice-keyboard-layout
-		   %lattice-initial-os
-		   %lattice-system-base-features))
+         #:use-module (gnu system)
+         #:use-module (gnu system keyboard)
+         #:use-module (gnu system file-systems)
+         #:use-module (gnu bootloader)
+         #:use-module (gnu bootloader grub)
+         #:use-module (rde features)
+         #:use-module (rde features base)
+         #:use-module (rde features system)
+         #:use-module (rde features keyboard)
+         #:export (
+                   %lattice-timezone
+                   %lattice-locale
+                   %lattice-kernel-arguments
+                   %lattice-keyboard-layout
+                   %lattice-initial-os
+                   %lattice-system-base-features))
 
        (define-public %lattice-timezone "America/Phoenix")
        (define-public %lattice-locale "en_US.utf8")
 
        (define-public %lattice-kernel-arguments
-	 (list "modprobe.blacklist=pcspkr,snd_pcsp"
-	       "quiet"))
+         (list "modprobe.blacklist=pcspkr,snd_pcsp"
+               "quiet"))
 
        (define-public %lattice-keyboard-layout
-	 (keyboard-layout "us"
-			  #:options
-			  '("ctrl:swapcaps")))
+         (keyboard-layout "us"
+                          #:options
+                          '("ctrl:swapcaps")))
 
        (define-public %lattice-initial-os
-	 (operating-system
-	  (host-name "hal")
-	  (locale %lattice-locale)
-	  (timezone %lattice-timezone)
-	  (kernel-arguments %lattice-kernel-arguments)
-	  (keyboard-layout %lattice-keyboard-layout)
-	  (bootloader (bootloader-configuration
-		       (bootloader grub-efi-bootloader)
-		       (targets '("/boot/efi"))))
-	  (services '())
-	  (file-systems %base-file-systems)
-	  (issue "This is the GNU/Lattice system.\n")))
+         (operating-system
+          (host-name "hal")
+          (locale %lattice-locale)
+          (timezone %lattice-timezone)
+          (kernel-arguments %lattice-kernel-arguments)
+          (keyboard-layout %lattice-keyboard-layout)
+          (bootloader (bootloader-configuration
+                       (bootloader grub-efi-bootloader)
+                       (targets '("/boot/efi"))))
+          (services '())
+          (file-systems %base-file-systems)
+          (issue "This is the GNU/Lattice system.\n")))
 
        (define-public %lattice-system-base-features
-	 (list
-	  (feature-keyboard
-	   #:keyboard-layout %lattice-keyboard-layout)))
+         (list
+          (feature-keyboard
+           #:keyboard-layout %lattice-keyboard-layout)))
 
      #+end_src
 ** Hal
@@ -322,20 +322,19 @@ This contains the configurations specific to my Thinkpad X220
                 #:use-module (gnu bootloader grub)
                 #:use-module (dwl-guile home-service)
                 #:use-module (gnu system file-systems)
-                #:use-module (gnu system mapped-devices))
+                #:use-module (gnu system mapped-devices)
+                #:export (
+                          %system-features))
+
+
 
               (define-public %system-features
                 (list
                  (feature-host-info
-                  #:host-name "ghost"
+                  #:host-name "hal"
                   #:timezone %lattice-timezone
                   #:locale %lattice-locale)
-                 (feature-bootloader
-                  #:bootloader-configuration
-                  (bootloader-configuration
-                   (bootloader grub-bootloader)
-                   (targets '("/dev/boot"))
-                   (keyboard-layout %lattice-keyboard-layout)))
+                 (feature-bootloader)
                  (feature-file-systems
                   #:file-systems
                   (list

@@ -37,9 +37,9 @@
   #:use-module (guix inferior)
   #:use-module (guix channels)
   #:use-module (lattice systems)
+  #:use-module (lattice systems hal)
   #:use-module (lattice features emacs)
   #:use-module (lattice features wayland)
-  #:use-module (lattice systems)
   #:use-module (lattice users jak)
   #:use-module (ice-9 match))
 
@@ -134,7 +134,7 @@
     (append
      %user-features
      %main-features
-     %hal-features))))
+     %system-features))))
 
 (define-public hal-os
   (rde-config-operating-system hal-config))
