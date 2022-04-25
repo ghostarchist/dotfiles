@@ -43,16 +43,6 @@
   #:use-module (lattice users jak)
   #:use-module (ice-9 match))
 
-
-;; User-specific features
-
-(define %jak-features
-  (list
-   (feature-user-info
-    #:user-name "jak"
-    #:full-name "Jacob Boldman"
-    #:email "jacob@boldman.co")))
-
 ;;; Generic features should be applicable for various hosts/users/etc
 
 (define* (pkgs #:rest lst)
