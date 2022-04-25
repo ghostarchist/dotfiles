@@ -41,9 +41,9 @@ These configurations utilize [[https://git.sr.ht/~abcdw/rde][Tropin's rde system
 
 * Base
 This serves as the base config that the rde based modules will be broken out from. The goal is for this file to become minimal declaration that refers to my modules.
-#+begin_src scheme :noweb yes :tangle ./configs.scm 
+#+begin_src scheme :noweb yes :tangle ./config.scm 
   ;;<<file-warning>>
-  (define-module (configs)
+  (define-module (config)
     #:use-module (rde features)
     #:use-module (rde features base)
     #:use-module (rde features gnupg)
@@ -79,6 +79,7 @@ This serves as the base config that the rde based modules will be broken out fro
     #:use-module (guix gexp)
     #:use-module (guix inferior)
     #:use-module (guix channels)
+    #:use-module (lattice systems)
     #:use-module (lattice features emacs)
     #:use-module (lattice features wayland)
     #:use-module (lattice systems)
@@ -103,10 +104,10 @@ This serves as the base config that the rde based modules will be broken out fro
     "Packages from guix channel."
     (define channel-guix
       (list (channel
-	     (name 'guix)
-	     (url "https://git.savannah.gnu.org/git/guix.git")
-	     (commit
-	      "2b6af630d61dd5b16424be55088de2b079e9fbaf"))))
+             (name 'guix)
+             (url "https://git.savannah.gnu.org/git/guix.git")
+             (commit
+              "2b6af630d61dd5b16424be55088de2b079e9fbaf"))))
     (define inferior (inferior-for-channels channel-guix))
     (define (get-inferior-pkg pkg-name)
       (car (lookup-inferior-pkg pkg-name)))
@@ -131,22 +132,23 @@ This serves as the base config that the rde based modules will be broken out fro
       (feature-markdown)
       (feature-transmission #:auto-start? #f)
       (feature-ssh)
+      (feature-zsh)
 
       (feature-base-packages
        #:home-packages
        (append
-	(pkgs
-	 "nyxt"
-	 "ungoogled-chromium-wayland" "ublock-origin-chromium"
+        (pkgs
+         "nyxt"
+         "ungoogled-chromium-wayland" "ublock-origin-chromium"
 
-	 "jami"
+         "jami"
 
-	 "alsa-utils" "youtube-dl" "imv"
-	 "pavucontrol" "wev"
-	 "hicolor-icon-theme" "adwaita-icon-theme" "gnome-themes-standard"
-	 "papirus-icon-theme" "arc-theme"
-	 "ffmpeg"
-	 "ripgrep" "curl"))))
+         "alsa-utils" "youtube-dl" "imv"
+         "pavucontrol" "wev"
+         "hicolor-icon-theme" "adwaita-icon-theme" "gnome-themes-standard"
+         "papirus-icon-theme" "arc-theme"
+         "ffmpeg"
+         "ripgrep" "curl"))))
 
      %lattice-system-base-features
      %lattice-emacs-base-features
@@ -156,14 +158,14 @@ This serves as the base config that the rde based modules will be broken out fro
 
   (define hal-file-systems
     (list (file-system
-	    (mount-point "/boot/efi")
-	    (device (uuid "0351-5D8F" 'fat32))
-	    (type "vfat"))
-	   (file-system
-	    (mount-point "/")
-	    (device
-	     (uuid "01ccdad1-366b-4d8d-92e8-30315e87e8b9"))
-	    (type "ext4"))))
+            (mount-point "/boot/efi")
+            (device (uuid "0351-5D8F" 'fat32))
+            (type "vfat"))
+           (file-system
+            (mount-point "/")
+            (device
+             (uuid "01ccdad1-366b-4d8d-92e8-30315e87e8b9"))
+            (type "ext4"))))
 
   (define %hal-features
     (list
@@ -195,12 +197,73 @@ This serves as the base config that the rde based modules will be broken out fro
   (define (dispatcher)
     (let ((rde-target (getenv "RDE_TARGET")))
       (match rde-target
-	("hal-home" (rde-config-home-environment hal-config))
-	("hal-system" (rde-config-operating-system hal-config)))))
+        ("hal-home" (rde-config-home-environment hal-config))
+        ("hal-system" (rde-config-operating-system hal-config)))))
 
   (dispatcher)
 #+end_src
 
+     #+begin_src scheme :noweb yes :tangle ./lattice/configs.scm
+       (define-module (lattice configs)
+         #:use-module (guix gexp)
+         #:use-module (gnu packages fonts)
+         #:use-module (rde features)
+         #:use-module (rde features xdg)
+         #:use-module (rde features ssh)
+         #:use-module (rde features base)
+         #:use-module (rde features linux)
+         #:use-module (rde features fontutils)
+         #:use-module (rde features docker)
+         #:use-module (rde features bittorrent)
+         #:use-module (rde features shells)
+         #:use-module (rde features version-control)
+         #:use-module (rde features video)
+         #:use-module (dwl-guile patches)
+         #:use-module (dwl-guile home-service)
+         #:use-module (dtao-guile home-service)
+         #:use-module (lattice utils)
+         #:use-module (lattice systems)
+         #:use-module (lattice features emacs)
+         #:use-module (lattice features wayland)
+         #:use-module (lattice features nix))
+
+       (define %lattice-base-system-packages
+         (pkgs '("git" "nss-certs")))
+
+       (define %lattice-base-home-packages
+         (pkgs '("curl" "htop" "ncurses" "adwaita-icon-theme" "gnome-themes-standard" "nyxt" "ungoogled-chromium-wayland" "ublock-origin-chromium" "imv")))
+
+       (define %lattice-base-features
+         (list
+          (feature-base-services)
+          (feature-desktop-services)
+          (feature-docker)
+          (feature-pipewire)
+          (feature-backlight #:step 5)
+
+          (feature-fonts
+           #:font-monospace (font "Iosevka" #:size 11 #:weight 'regular)
+           #:font-packages (list font-iosevka font-fira-mono))
+
+          (feature-transmission #:auto-start? #f)
+          (feature-ssh)
+          (feature-zsh)
+
+          (feature-base-packages
+           #:system-packages %lattice-base-system-packages
+           #:home-packages %lattice-base-home-packages)
+          (feature-nix)
+          (feature-mpv)
+          (feature-wayland-mako)
+          (feature-wayland-foot)
+          (feature-wayland-wlsunset)
+          (feature-wayland-dtao-guile)
+          (feature-wayland-dwl-guile
+           #:dwl-guile-configuration
+           (home-dwl-guile-configuration
+            (patches %lattice-dwl-guile-patches)
+            (config %lattice-dwl-guile-config)))))
+     #+end_src
 * Systems
 ** Base
 This module defines common properties between my systems.
