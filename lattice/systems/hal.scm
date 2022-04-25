@@ -20,7 +20,7 @@
             (bootloader grub-bootloader)
             (targets '("/dev/boot"))
             (keyboard-layout %lattice-keyboard-layout)))
-          (feature-filesystems
+          (feature-file-systems
            #:file-systems
            (list
             (file-system
