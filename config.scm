@@ -37,9 +37,10 @@
   #:use-module (guix inferior)
   #:use-module (guix channels)
   #:use-module (lattice systems)
-  #:use-module (lattice systems hal)
   #:use-module (lattice features emacs)
   #:use-module (lattice features wayland)
+  #:use-module (lattice systems)
+  #:use-module (lattice systems hal)
   #:use-module (lattice users jak)
   #:use-module (ice-9 match))
 

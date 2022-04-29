@@ -6,11 +6,7 @@
          #:use-module (gnu bootloader grub)
          #:use-module (dwl-guile home-service)
          #:use-module (gnu system file-systems)
-         #:use-module (gnu system mapped-devices)
-         #:export (
-                   %system-features))
-
-
+         #:use-module (gnu system mapped-devices))
 
        (define-public %system-features
          (list
@@ -19,6 +15,11 @@
            #:timezone %lattice-timezone
            #:locale %lattice-locale)
           (feature-bootloader)
+          ;; #:bootloader-configuration
+          ;; (bootloader-configuration
+          ;;  (bootloader grub-bootloader)
+          ;;  (targets '("/dev/boot"))
+          ;;  (keyboard-layout %lattice-keyboard-layout)))
           (feature-file-systems
            #:file-systems
            (list
