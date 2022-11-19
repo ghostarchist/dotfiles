@@ -23,20 +23,6 @@ Seperate modules/configs into:
 - Home
 - Individual Hosts
 
-* TODO Stumpwm
-
-** TODO Workspace-like Groups
-Make Groups tied to numbers or characters, able to switch with ~s-~
-
-** MPD controls
-
-** TODO Integrate apps
-Make buffers and frames act as wm objects
-Call program commands from StumpWM
-*** Nyxt
-
-*** Emacs
-
 * TODO Emacs
 * TODO Nyxt 
 * Services to add

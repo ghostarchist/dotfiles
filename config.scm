@@ -1,4 +1,8 @@
 (define-module (config)
+  #:use-module (engstrand configs)
+  #:use-module (engstrand features emacs)
+  ;;;#:use-module (engstrand features wayland)
+  #:use-module (engstrand features statusbar)
   #:use-module (rde features)
   #:use-module (rde features base)
   #:use-module (rde features gnupg)
@@ -29,7 +33,7 @@
   #:use-module (rde features networking)
   #:use-module (gnu services)
   #:use-module (rde home services i2p)
-  ;; #:use-module (gnu services nix)
+  #:use-module (gnu services nix)
   #:use-module (gnu system)
   #:use-module (gnu system keyboard)
   #:use-module (gnu system file-systems)
@@ -97,17 +101,12 @@
        (key "s-<tab>")
        (action
         '(dwl:view-previous))))
-     %dwl-base-keys))
-   (colors
-    (dwl-colors
-     (root "#191919")
-     (border "#808080")
-     (focus "#FFCC00")))))
+     %dwl-base-keys))))
 
-;; Checks if SYMBOL corresponds to a patch that is/will
-;; be applied to dwl-guile, based on the features values in CONFIG.
-;; SYMBOL should be the name of the patch, not including the ".patch" extension.
-;; I.E @code{(has-dwl-patch? 'xwayland config)}.
+;;; Checks if SYMBOL corresponds to a patch that is/will
+;;; be applied to dwl-guile, based on the features values in CONFIG.
+;;; SYMBOL should be the name of the patch, not including the ".patch" extension.
+;;; I.E @code{(has-dwl-patch? 'xwayland config)}.
 (define
   (has-dwl-patch? symbol config)
   (let
@@ -394,375 +393,362 @@
    (name 'wayland-wlsunset)
    (home-services-getter get-home-services)))
 
-(define lattice-dtao-guile-left-blocks
-  (append
-   (map
-    (lambda
-        (tag)
-      (let
-          ((str
-            (string-append "^p(8)"
-                           (number->string tag)
-                           "^p(8)"))
-           (index
-            (- tag 1)))
-        (dtao-block
-         (interval 0)
-         (events? #t)
-         (click
-          `(match button
-             (0
-              (dtao:view ,index))))
-         (render
-          `(cond
-            ((dtao:selected-tag? ,index)
-             ,(string-append "^bg(#ffcc00)^fg(#191919)" str "^fg()^bg()"))
-            ((dtao:urgent-tag? ,index)
-             ,(string-append "^bg(#ff0000)^fg(#ffffff)" str "^fg()^bg()"))
-            ((dtao:active-tag? ,index)
-             ,(string-append "^bg(#323232)^fg(#ffffff)" str "^fg()^bg()"))
-            (else ,str))))))
-    (iota 9 1))
-   (list
-    (dtao-block
-     (events? #t)
-     (click
-      `(dtao:next-layout))
-     (render
-      `(string-append "^p(4)"
-                      (dtao:get-layout)))))))
+;;;(define lattice-dtao-guile-left-blocks
+;;;  (append
+;;;   (map
+;;;    (lambda
+;;;        (tag)
+;;;      (let
+;;;          ((str
+;;;            (string-append "^p(8)"
+;;;                           (number->string tag)
+;;;                           "^p(8)"))
+;;;           (index
+;;;            (- tag 1)))
+;;;        (dtao-block
+;;;         (interval 0)
+;;;         (events? #t)
+;;;         (click
+;;;          `(match button
+;;;             (0
+;;;              (dtao:view ,index))))
+;;;         (render
+;;;          `(cond
+;;;            ((dtao:selected-tag? ,index)
+;;;             ,(string-append "^bg(#ffcc00)^fg(#191919)" str "^fg()^bg()"))
+;;;            ((dtao:urgent-tag? ,index)
+;;;             ,(string-append "^bg(#ff0000)^fg(#ffffff)" str "^fg()^bg()"))
+;;;            ((dtao:active-tag? ,index)
+;;;             ,(string-append "^bg(#323232)^fg(#ffffff)" str "^fg()^bg()"))
+;;;            (else ,str))))))
+;;;    (iota 9 1))
+;;;   (list
+;;;    (dtao-block
+;;;     (events? #t)
+;;;     (click
+;;;      `(dtao:next-layout))
+;;;     (render
+;;;      `(string-append "^p(4)"
+;;;                      (dtao:get-layout)))))))
+;;;
+;;;(define lattice-dtao-guile-center-blocks
+;;;  (list
+;;;   (dtao-block
+;;;    (events? #t)
+;;;    (render
+;;;     `(dtao:title)))))
+;;;
+;;;(define lattice-dtao-guile-right-blocks
+;;;  (list
+;;;   (dtao-block
+;;;    (interval 1)
+;;;    (render
+;;;     `(strftime "%A, %d %b (w.%V) %T"
+;;;                (localtime
+;;;                 (current-time)))))))
+;;;
+;;;(define*
+;;;  (feature-wayland-dtao-guile)
+;;;  "Install and configure dtao-guile"
+;;;  (define height 25)
+;;;  (define
+;;;    (get-home-services config)
+;;;    "Return a list of home services required by dtao-guile."
+;;;    (require-value 'font-monospace config)
+;;;    (list
+;;;     (service home-dtao-guile-service-type
+;;;              (home-dtao-guile-configuration
+;;;               (config
+;;;                (dtao-config
+;;;                 (font(font->string 'fcft 'font-monospace config
+;;;                                    #:bold? #t))
+;;;                 (block-spacing 0)
+;;;                 (use-dwl-guile-colorscheme? #t)
+;;;                 (modules
+;;;                  '((ice-9 match)
+;;;                    (ice-9 popen)
+;;;                    (ice-9 rdelim)
+;;;                    (srfi srfi-1)))
+;;;                 (padding-left 0)
+;;;                 (padding-top 0)
+;;;                 (padding-bottom 0)
+;;;                 (height height)
+;;;                 (left-blocks lattice-dtao-guile-left-blocks)
+;;;                 (center-blocks lattice-dtao-guile-center-blocks)
+;;;                 (right-blocks lattice-dtao-guile-right-blocks)))))))
+;;;  (feature
+;;;   (name 'wayland-dtao-guile)
+;;;   (values
+;;;    `((statusbar? . #t)
+;;;      (statusbar-height . ,height)
+;;;      (dtao-guile . #t)))
+;;;   (home-services-getter get-home-services)))
 
-(define lattice-dtao-guile-center-blocks
-  (list
-   (dtao-block
-    (events? #t)
-    (render
-     `(dtao:title)))))
+;;;(define*
+;;;  (feature-wayland-bemenu
+;;;   #:key
+;;;   (set-default-menu? #t))
+;;;  "Setup bemenu."
+;;;  (ensure-pred boolean? set-default-menu?)
+;;;  (define
+;;;    (get-home-services config)
+;;;    "Return a list of home services required by bemenu."
+;;;    (require-value 'font-monospace config)
+;;;    (make-service-list
+;;;     (simple-service
+;;;      'add-bemenu-home-package-to-profile
+;;;      home-profile-service-type
+;;;      (list bemenu))
+;;;     (when
+;;;         (and set-default-menu?
+;;;              (get-value 'dwl-guile config))
+;;;       (simple-service
+;;;        'set-bemenu-as-default-menu
+;;;        home-dwl-guile-service-type
+;;;        (modify-dwl-guile-config
+;;;         (config =>
+;;;                 (dwl-config
+;;;                  (inherit config)
+;;;                  (menu
+;;;                   `(,(file-append bemenu "/bin/bemenu-run"))))))))
+;;;     (simple-service
+;;;      'bemenu-options
+;;;      home-environment-variables-service-type
+;;;      (alist->environment-variable
+;;;       "BEMENU_OPTS"
+;;;       `(("ignorecase" . #t)
+;;;         ("line-height"
+;;;          . ,(get-value 'statusbar-height config 25))
+;;;         ("filter" . #f)
+;;;         ("wrap" . #f)
+;;;         ("list" . #f)
+;;;         ("prompt" #f)
+;;;         ("prefix" . #f)
+;;;         ("index" . #f)
+;;;         ("password" . #f)
+;;;         ("scrollbar" . #f)
+;;;         ("ifne" . #f)
+;;;         ("fork" . #f)
+;;;         ("no-exec" . #f)
+;;;         ("bottom" . #f)
+;;;         ("grab" . #f)
+;;;         ("no-overlap" . #f)
+;;;         ("monitor" . #f)
+;;;         ("fn"
+;;;          . ,(font->string 'pango 'font-monospace config
+;;;                           #:bold? #t
+;;;                           #:size 10))
+;;;         ("tb" . "#FFCC00")
+;;;         ("tf" . "#000000")
+;;;         ("fb" . "#1A1A1A")
+;;;         ("ff" . "#FFFFFF")
+;;;         ("nb" . "#1A1A1A")
+;;;         ("nf" . "#FFFFFF")
+;;;         ("hb" . "#1A1A1A")
+;;;         ("hf" . "#FFCC00")
+;;;         ("sb" . #f)
+;;;         ("sf" . #f)
+;;;         ("scb" . #f)
+;;;         ("scf" . #f))))))
+;;;  (feature
+;;;   (name 'wayland-bemenu)
+;;;   (home-services-getter get-home-services)))
 
-(define lattice-dtao-guile-right-blocks
-  (list
-   (dtao-block
-    (interval 1)
-    (render
-     `(strftime "%A, %d %b (w.%V) %T"
-                (localtime
-                 (current-time)))))))
+;;;(define*
+;;;  (make-emacs-feature base-name
+;;;                      #:key
+;;;                      (home-services
+;;;                       (const
+;;;                        '()))
+;;;                      (system-services
+;;;                       (const
+;;;                        '())))
+;;;  "Create a basic emacs feature configuration."
+;;;  (let
+;;;      ((f-name
+;;;        (symbol-append 'emacs- base-name)))
+;;;    (feature
+;;;     (name f-name)
+;;;     (values
+;;;      `((,f-name . #t)))
+;;;     (home-services-getter home-services)
+;;;     (system-services-getter system-services))))
 
-(define*
-  (feature-wayland-dtao-guile)
-  "Install and configure dtao-guile"
-  (define height 25)
-  (define
-    (get-home-services config)
-    "Return a list of home services required by dtao-guile."
-    (require-value 'font-monospace config)
-    (list
-     (service home-dtao-guile-service-type
-              (home-dtao-guile-configuration
-               (config
-                (dtao-config
-                 (font(font->string 'fcft 'font-monospace config
-                                    #:bold? #t))
-                 (block-spacing 0)
-                 (use-dwl-guile-colorscheme? #t)
-                 (modules
-                  '((ice-9 match)
-                    (ice-9 popen)
-                    (ice-9 rdelim)
-                    (srfi srfi-1)))
-                 (padding-left 0)
-                 (padding-top 0)
-                 (padding-bottom 0)
-                 (height height)
-                 (left-blocks lattice-dtao-guile-left-blocks)
-                 (center-blocks lattice-dtao-guile-center-blocks)
-                 (right-blocks lattice-dtao-guile-right-blocks)))))))
-  (feature
-   (name 'wayland-dtao-guile)
-   (values
-    `((statusbar? . #t)
-      (statusbar-height . ,height)
-      (dtao-guile . #t)))
-   (home-services-getter get-home-services)))
+;;;(define*
+;;;  (feature-emacs-default-editor)
+;;;  "Configure emacs as the default system editor."
+;;;  (define
+;;;    (get-home-services config)
+;;;    (list
+;;;     (simple-service
+;;;      'set-emacs-environment-variables
+;;;      home-environment-variables-service-type
+;;;      `(("EDITOR" . ,(file-append %lattice-emacs-package "/bin/emacs"))
+;;;        ;; Used by guix commands, e.g. guix edit. rde sets this by itself,
+;;;        ;; but the --no-wait option does not seem to play nice with this setup.
+;;;        ("VISUAL" . ,(get-value 'emacs-client-create-frame config))))))
+;;;  (feature
+;;;   (name 'emacs-default-editor)
+;;;   (home-services-getter get-home-services)))
 
-(define*
-  (feature-wayland-bemenu
-   #:key
-   (set-default-menu? #t))
-  "Setup bemenu."
-  (ensure-pred boolean? set-default-menu?)
-  (define
-    (get-home-services config)
-    "Return a list of home services required by bemenu."
-    (require-value 'font-monospace config)
-    (make-service-list
-     (simple-service
-      'add-bemenu-home-package-to-profile
-      home-profile-service-type
-      (list bemenu))
-     (when
-         (and set-default-menu?
-              (get-value 'dwl-guile config))
-       (simple-service
-        'set-bemenu-as-default-menu
-        home-dwl-guile-service-type
-        (modify-dwl-guile-config
-         (config =>
-                 (dwl-config
-                  (inherit config)
-                  (menu
-                   `(,(file-append bemenu "/bin/bemenu-run"))))))))
-     (simple-service
-      'bemenu-options
-      home-environment-variables-service-type
-      (alist->environment-variable
-       "BEMENU_OPTS"
-       `(("ignorecase" . #t)
-         ("line-height"
-          . ,(get-value 'statusbar-height config 25))
-         ("filter" . #f)
-         ("wrap" . #f)
-         ("list" . #f)
-         ("prompt" #f)
-         ("prefix" . #f)
-         ("index" . #f)
-         ("password" . #f)
-         ("scrollbar" . #f)
-         ("ifne" . #f)
-         ("fork" . #f)
-         ("no-exec" . #f)
-         ("bottom" . #f)
-         ("grab" . #f)
-         ("no-overlap" . #f)
-         ("monitor" . #f)
-         ("fn"
-          . ,(font->string 'pango 'font-monospace config
-                           #:bold? #t
-                           #:size 10))
-         ("tb" . "#FFCC00")
-         ("tf" . "#000000")
-         ("fb" . "#1A1A1A")
-         ("ff" . "#FFFFFF")
-         ("nb" . "#1A1A1A")
-         ("nf" . "#FFFFFF")
-         ("hb" . "#1A1A1A")
-         ("hf" . "#FFCC00")
-         ("sb" . #f)
-         ("sf" . #f)
-         ("scb" . #f)
-         ("scf" . #f))))))
-  (feature
-   (name 'wayland-bemenu)
-   (home-services-getter get-home-services)))
-
-(define*
-  (make-emacs-feature base-name
-                      #:key
-                      (home-services
-                       (const
-                        '()))
-                      (system-services
-                       (const
-                        '())))
-  "Create a basic emacs feature configuration."
-  (let
-      ((f-name
-        (symbol-append 'emacs- base-name)))
-    (feature
-     (name f-name)
-     (values
-      `((,f-name . #t)))
-     (home-services-getter home-services)
-     (system-services-getter system-services))))
-
-(define*
-  (feature-emacs-default-editor)
-  "Configure emacs as the default system editor."
-  (define
-    (get-home-services config)
-    (list
-     (simple-service
-      'set-emacs-environment-variables
-      home-environment-variables-service-type
-      `(("EDITOR" . ,(file-append %lattice-emacs-package "/bin/emacs"))
-        ;; Used by guix commands, e.g. guix edit. rde sets this by itself,
-        ;; but the --no-wait option does not seem to play nice with this setup.
-        ("VISUAL" . ,(get-value 'emacs-client-create-frame config))))))
-  (feature
-   (name 'emacs-default-editor)
-   (home-services-getter get-home-services)))
-
-(define*
-  (feature-emacs-org-latex-preview)
-  "Add and configure latex previews in Emacs Org mode."
-  (define emacs-f-name 'org-latex-preview)
-  (define
-    (get-home-services config)
-    (list
-     (simple-service
-      'add-org-mode-latex-preview-home-packages-to-profile
-      home-profile-service-type
-      (pkgs "texlive" "texlive-latex-preview" "texlive-graphics-def"))
-     (rde-elisp-configuration-service
-      emacs-f-name
-      config
-      `((require 'org)
-        ;; Use dvisvgm for latex rendering
-        (setq org-latex-create-formula-image-program 'dvisvgm)
-        ;; Increase latex preview scale in org mode
-        (setq org-format-latex-options
-              (plist-put org-format-latex-options :scale 2.8))))))
-  (make-emacs-feature emacs-f-name
-                      #:home-services get-home-services))
+;;;(define*
+;;;  (feature-emacs-org-latex-preview)
+;;;  "Add and configure latex previews in Emacs Org mode."
+;;;  (define emacs-f-name 'org-latex-preview)
+;;;  (define
+;;;    (get-home-services config)
+;;;    (list
+;;;     (simple-service
+;;;      'add-org-mode-latex-preview-home-packages-to-profile
+;;;      home-profile-service-type
+;;;      (pkgs "texlive" "texlive-latex-preview" "texlive-graphics-def"))
+;;;     (rde-elisp-configuration-service
+;;;      emacs-f-name
+;;;      config
+;;;      `((require 'org)
+;;;        ;; Use dvisvgm for latex rendering
+;;;        (setq org-latex-create-formula-image-program 'dvisvgm)
+;;;        ;; Increase latex preview scale in org mode
+;;;        (setq org-format-latex-options
+;;;              (plist-put org-format-latex-options :scale 2.8))))))
+;;;  (make-emacs-feature emacs-f-name
+;;;                      #:home-services get-home-services))
 
 ;;TODO Add "TabandGo" key word to RDE repo
-(define*
-  (feature-emacs-corfu)
-  "Add and configure Corfu completion for Emacs."
-  (define emacs-f-name 'corfu)
-  (define
-    (get-home-services config)
-    (list
-     (rde-elisp-configuration-service
-      emacs-f-name
-      config
-      `((require 'corfu)
-        ;; TAB-and-Go completion
-        (setq corfu-cycle t)
-        (setq corfu-preselect-first nil)
-        (setq corfu-auto t)
-        (global-corfu-mode 1)
-        (define-key corfu-map
-          (kbd "<tab>")
-          'corfu-next)
-        (define-key corfu-map
-          (kbd "<backtab>")
-          'corfu-previous))
-      #:elisp-packages
-      (list
-       emacs-corfu))))
-  (make-emacs-feature emacs-f-name
-                      #:home-services get-home-services))
 
-(define*
-  (feature-emacs-dashboard)
-  "Add and configure emacs-dashboard as a welcome screen."
-  (define emacs-f-name 'dashboard)
-  (define
-    (get-home-services config)
-    (list
-     (rde-elisp-configuration-service
-      emacs-f-name
-      config
-      `((eval-when-compile
-         (require 'dashboard))
-        (dashboard-setup-startup-hook)
-        (setq dashboard-center-content t)
-        (setq dashboard-set-init-info nil)
-        (setq dashboard-set-footer nil)
-        (setq dashboard-page-separator "\n\n")
-        ;;TODO change to projectile or check somehow
-        (eval-when-compile
-         (require 'project))
-        (setq dashboard-projects-backend 'project)
-        )
-      #:elisp-packages
-      (list
-       emacs-dashboard
-       emacs-project
-       emacs-all-the-icons))))
-  (make-emacs-feature emacs-f-name
-                      #:home-services get-home-services))
+;;; (define*
+;;;  (feature-emacs-dashboard)
+;;;  "Add and configure emacs-dashboard as a welcome screen."
+;;;  (define emacs-f-name 'dashboard)
+;;;  (define
+;;;    (get-home-services config)
+;;;    (list
+;;;     (rde-elisp-configuration-service
+;;;      emacs-f-name
+;;;      config
+;;;      `((eval-when-compile
+;;;         (require 'dashboard))
+;;;        (dashboard-setup-startup-hook)
+;;;        (setq dashboard-center-content t)
+;;;        (setq dashboard-set-init-info nil)
+;;;        (setq dashboard-set-footer nil)
+;;;        (setq dashboard-page-separator "\n\n")
+;;;        ;;TODO change to projectile or check somehow
+;;;        (eval-when-compile
+;;;         (require 'project))
+;;;        (setq dashboard-projects-backend 'project)
+;;;        )
+;;;      #:elisp-packages
+;;;      (list
+;;;       emacs-dashboard
+;;;       emacs-project
+;;;       emacs-all-the-icons))))
+;;;  (make-emacs-feature emacs-f-name
+;;;                      #:home-services get-home-services))
 
-(define*
-  (feature-emacs-evil
-   #:key
-   (no-insert-state-message? #t)
-   (leader? #t)
-   (undo-fu? #t)
-   (commentary? #t)
-   (collection? #t)
-   (surround? #t))
-  "Add and configure evil-mode for Emacs."
-  (ensure-pred boolean? no-insert-state-message?)
-  (ensure-pred boolean? leader?)
-  (ensure-pred boolean? undo-fu?)
-  (ensure-pred boolean? collection?)
-  (ensure-pred boolean? surround?)
-  (define emacs-f-name 'evil)
-  (define
-    (get-home-services config)
-    (list
-     (rde-elisp-configuration-service
-      emacs-f-name
-      config
-      `( ;; Make the Escape key behave more nicely for evil-mode
-        (global-set-key
-         (kbd "<escape>")
-         'keyboard-quit)
-        (define-key query-replace-map
-          (kbd "<escape>")
-          'quit)
-        ;; Hide ``-- INSERT --'' message
-        ,@(if no-insert-state-message?
-              `((setq evil-insert-state-message nil))
-              '())
-        ;;Required by the additional packages
-        ;;TODO add toggle for these
-        (setq evil-want-keybinding nil)
-        ;; Use C-u to scroll up
-        (setq evil-want-C-u-scroll t)
-        ;; undo with higher granularity
-        (setq evil-want-fine-undo t)
-        ;; The packages below must be loaded and configured in a certain order
-        (require 'evil)
-        ,@(if leader?
-              `((require 'evil-leader)
-                (global-evil-leader-mode)
-                (evil-leader/set-leader "<SPC>")
-                (evil-leader/set-key
-                 "<SPC>" 'find-file
-                 "b" 'switch-to-buffer
-                 "k" 'kill-buffer
-                 "K" 'kill-this-buffer
-                 "s" 'save-buffer
-                 "S" 'evil-write-all
-                 )
-                '()))
-        ,@(if undo-fu?
-              `((eval-when-compile
-                 (require 'undo-fu))
-                (setq evil-undo-system 'undo-fu)
-                (define-key evil-normal-state-map
-                  (kbd "u")
-                  'undo-fu-only-undo)
-                (define-key evil-normal-state-map
-                  (kbd "C-r")
-                  'undo-fu-only-redo))
-              '())
-        (evil-mode 1)
-        ,@(if commentary?
-              `((require 'evil-commentary)
-                (evil-commentary-mode))
-              '())
-        ,@(if collection?
-              `((when
-                    (require 'evil-collection nil t)
-                  (evil-collection-init)))
-              '())
-        )
-      #:elisp-packages
-      (list
-       emacs-evil
-       (if leader? emacs-evil-leader)
-       (if undo-fu? emacs-undo-fu)
-       (if commentary? emacs-evil-commentary)
-       (if collection? emacs-evil-collection)
-       (if surround? emacs-evil-surround)))))
-  (make-emacs-feature emacs-f-name
-                      #:home-services get-home-services))
+;;;(define*
+;;;  (feature-emacs-evil
+;;;   #:key
+;;;   (no-insert-state-message? #t)
+;;;   (leader? #t)
+;;;   (undo-fu? #t)
+;;;   (commentary? #t)
+;;;   (collection? #t)
+;;;   (surround? #t))
+;;;  "Add and configure evil-mode for Emacs."
+;;;  (ensure-pred boolean? no-insert-state-message?)
+;;;  (ensure-pred boolean? leader?)
+;;;  (ensure-pred boolean? undo-fu?)
+;;;  (ensure-pred boolean? collection?)
+;;;  (ensure-pred boolean? surround?)
+;;;  (define emacs-f-name 'evil)
+;;;  (define
+;;;    (get-home-services config)
+;;;    (list
+;;;     (rde-elisp-configuration-service
+;;;      emacs-f-name
+;;;      config
+;;;      `( ;; Make the Escape key behave more nicely for evil-mode
+;;;        (global-set-key
+;;;         (kbd "<escape>")
+;;;         'keyboard-quit)
+;;;        (define-key query-replace-map
+;;;          (kbd "<escape>")
+;;;          'quit)
+;;;        ;; Hide ``-- INSERT --'' message
+;;;        ,@(if no-insert-state-message?
+;;;              `((setq evil-insert-state-message nil))
+;;;              '())
+;;;        ;;Required by the additional packages
+;;;        ;;TODO add toggle for these
+;;;        (setq evil-want-keybinding nil)
+;;;        ;; Use C-u to scroll up
+;;;        (setq evil-want-C-u-scroll t)
+;;;        ;; undo with higher granularity
+;;;        (setq evil-want-fine-undo t)
+;;;        ;; The packages below must be loaded and configured in a certain order
+;;;        (require 'evil)
+;;;        ,@(if leader?
+;;;              `((require 'evil-leader)
+;;;                (global-evil-leader-mode)
+;;;                (evil-leader/set-leader "<SPC>")
+;;;                (evil-leader/set-key
+;;;                 "<SPC>" 'find-file
+;;;                 "b" 'switch-to-buffer
+;;;                 "k" 'kill-buffer
+;;;                 "K" 'kill-this-buffer
+;;;                 "s" 'save-buffer
+;;;                 "S" 'evil-write-all
+;;;                 )
+;;;                '()))
+;;;        ,@(if undo-fu?
+;;;              `((eval-when-compile
+;;;                 (require 'undo-fu))
+;;;                (setq evil-undo-system 'undo-fu)
+;;;                (define-key evil-normal-state-map
+;;;                  (kbd "u")
+;;;                  'undo-fu-only-undo)
+;;;                (define-key evil-normal-state-map
+;;;                  (kbd "C-r")
+;;;                  'undo-fu-only-redo))
+;;;              '())
+;;;        (evil-mode 1)
+;;;        ,@(if commentary?
+;;;              `((require 'evil-commentary)
+;;;                (evil-commentary-mode))
+;;;              '())
+;;;        ,@(if collection?
+;;;              `((when
+;;;                    (require 'evil-collection nil t)
+;;;                  (evil-collection-init)))
+;;;              '())
+;;;        )
+;;;      #:elisp-packages
+;;;      (list
+;;;       emacs-evil
+;;;       (if leader? emacs-evil-leader)
+;;;       (if undo-fu? emacs-undo-fu)
+;;;       (if commentary? emacs-evil-commentary)
+;;;       (if collection? emacs-evil-collection)
+;;;       (if surround? emacs-evil-surround)))))
+;;;  (make-emacs-feature emacs-f-name
+;;;                      #:home-services get-home-services))
 
+(define* (mail-acc id user #:optional (type 'migadu))
+  "Make a simple mail-account with migadu type by default."
+  (mail-account
+   (id id)
+   (fqda user)
+   (type type)))
 
+(define* (mail-lst id fqda urls)
+  "Make a simple mailing-list."
+  (mailing-list
+   (id id)
+   (fqda fqda)
+   (config (l1md-repo
+            (name (symbol->string id))
+            (urls urls)))))
 
 (define %user-features
   (list
@@ -775,7 +761,16 @@
 ;;; (feature-keyboard
 ;;;  #:keyboard-layout
 ;;;  (keyboard-layout ))
-   ))
+   )
+;;;  (feature-mail-settings
+;;;   #:mail-accounts (list (mail-acc 'personal "jacob@boldman.co" 'migadu))
+;;;   #:mailing-lists (list (mail-lst 'guix-devel "guix-devel@gnu.org"
+;;;                                   '("https://yhetil.org/guix-devel/0"))
+;;;                         (mail-lst 'guix-bugs "guix-bugs@gnu.org"
+;;;                                   '("https://yhetil.org/guix-bugs/0"))
+;;;                         (mail-lst 'guix-patches "guix-patches@gnu.org"
+;;;                                   '(https://yhetil.org/guix-patches/1))))
+  )
 
 (define*
   (pkgs #:rest lst)
@@ -803,6 +798,10 @@
   (list
    (feature-base-services)
    (feature-desktop-services)
+   (feature-yggdrasil)
+   (feature-i2pd
+    #:outproxy 'exit.stormycloud.i2p)
+    ;; 'purokishi.i2p
    (feature-docker)
    (feature-pipewire)
    (feature-backlight #:step 5)
@@ -827,7 +826,7 @@
    (feature-wayland-mako)
    (feature-wayland-foot)
    (feature-wayland-wlsunset)
-   (feature-wayland-dtao-guile)
+   (feature-statusbar-dtao-guile)
    (feature-emacs
     #:extra-init-el
     `((setq org-src-window-setup 'current-window)
@@ -859,14 +858,16 @@
            "emacs-restart-emacs"
            "emacs-org-present")))
    (feature-emacs-appearance
-   #:deuteranopia? #f
+   #:deuteranopia? #t
     #:dark? #f
     #:extra-elisp
-    `((setq modus-themes-org-blocks 'tinted-background)))
+    `((setq modus-themes-org-blocks 'tinted-background)
+      (set-face-attribute 'cursor nil :background (modus-themes-color-alts 'blue 'red))))
    (feature-emacs-faces)
    (feature-emacs-evil)
    (feature-emacs-completion
-    #:mini-frame? #t)
+    #:mini-frame? #t
+    #:marginalia-align 'right)
    (feature-emacs-corfu)
    (feature-emacs-tramp)
    (feature-emacs-vertico)
@@ -886,7 +887,8 @@
     #:show-smartparens? #t)
    (feature-emacs-geiser)
    (feature-emacs-guix)
-   (feature-emacs-git)
+   (feature-emacs-git
+    #:project-directory "~/projects")
    (feature-emacs-org
     #:org-directory "~/org")
    (feature-emacs-org-roam
